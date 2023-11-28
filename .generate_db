@@ -1,0 +1,1 @@
+npx typeorm-model-generator -h testdb.ch5fso1lywjb.eu-west-3.rds.amazonaws.com -d login-portal-v2 -p 5434 -u postgres -x testdbchowis0000 -e postgres -o ./src/common

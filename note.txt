@@ -1,0 +1,7 @@
+moistureU
+moistureT
+sebumU
+sebumT
+skintone-dior
+skintone-chowis
+fitzpatrick have their own API
