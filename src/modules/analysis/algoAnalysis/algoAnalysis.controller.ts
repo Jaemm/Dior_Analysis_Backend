@@ -20,7 +20,7 @@ import {
 import * as celery from 'celery-node';
 import e, { Request, Response } from 'express';
 import { AlgoAnalysisService } from './algoAnalysis.service';
-import { FileInterceptor, FilesInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
     AlgoAnalysisCBBDTO,
     AlgoAnalysisDTO,
@@ -39,20 +39,11 @@ import { FileUploadService } from 'src/common/FileUpload/fileUpload.service';
 import { SebumUService } from 'src/modules/algorithms/sebumU/sebumU.service';
 import { SebumTService } from 'src/modules/algorithms/sebumT/sebumT.service';
 import { SkinToneDiorService } from 'src/modules/algorithms/skinToneDior/skinToneDior.service';
-import { OfflineDataCBBDTO, OfflineDatasDTO } from 'src/common/Dto/analysis/offlineData.dto';
+import { OfflineDataCBBDTO } from 'src/common/Dto/analysis/offlineData.dto';
 import { AuthMiddleware } from 'src/common/middleWare/authMiddlware/auth.middleware';
 import { BatchAnalysisService } from '../batchAnalysis/batchAnalysis.service';
 import { ComputationService } from 'src/modules/algorithms/computation/computation.service';
-import {
-    ApiBearerAuth,
-    ApiBody,
-    ApiConsumes,
-    ApiExcludeController,
-    ApiExcludeEndpoint,
-    ApiOperation,
-    ApiResponse,
-    ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import * as jwt from 'jsonwebtoken';
 import * as fs from 'fs';
@@ -373,157 +364,157 @@ export class AlgoAnalysisController {
         }
     }
 
-    @UseGuards(AuthMiddleware)
-    @ApiBearerAuth('access-token')
-    @ApiConsumes('multipart/form-data')
-    @ApiBody({ type: MoistureDTO })
-    @Post('/sebumU')
-    @UseInterceptors(
-        FileFieldsInterceptor([
-            { name: 'originalImage', maxCount: 1 },
-            { name: 'analyzedImage', maxCount: 1 },
-        ]),
-    )
-    async sebumU(
-        @Query() param: any,
-        @Res() res: Response,
-        @Body() body: any,
-        @UploadedFiles()
-        file: { originalImage: Express.Multer.File[]; analyzedImage: Express.Multer.File[] },
-    ) {
-        if (!file['originalImage'][0] || !file['analyzedImage'][0])
-            return res.send({ status: 40002, type: 'BadRequestError', message: 'There is no necassary image file!' });
+    // @UseGuards(AuthMiddleware)
+    // @ApiBearerAuth('access-token')
+    // @ApiConsumes('multipart/form-data')
+    // @ApiBody({ type: MoistureDTO })
+    // @Post('/sebumU')
+    // @UseInterceptors(
+    //     FileFieldsInterceptor([
+    //         { name: 'originalImage', maxCount: 1 },
+    //         { name: 'analyzedImage', maxCount: 1 },
+    //     ]),
+    // )
+    // async sebumU(
+    //     @Query() param: any,
+    //     @Res() res: Response,
+    //     @Body() body: any,
+    //     @UploadedFiles()
+    //     file: { originalImage: Express.Multer.File[]; analyzedImage: Express.Multer.File[] },
+    // ) {
+    //     if (!file['originalImage'][0] || !file['analyzedImage'][0])
+    //         return res.send({ status: 40002, type: 'BadRequestError', message: 'There is no necassary image file!' });
 
-        const imageRecords = uuidv4();
+    //     const imageRecords = uuidv4();
 
-        const originalImage = file.originalImage[0].buffer;
-        const analyzedImage = file.analyzedImage[0].buffer;
+    //     const originalImage = file.originalImage[0].buffer;
+    //     const analyzedImage = file.analyzedImage[0].buffer;
 
-        const analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', '', 'sebumU');
+    //     const analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', '', 'sebumU');
 
-        const originalImageArgs = this.S3Image.getImageArgs('originalImage', '', 'sebumU');
+    //     const originalImageArgs = this.S3Image.getImageArgs('originalImage', '', 'sebumU');
 
-        await this.sebum_u.saveData(body, analyzedImageArgs, originalImageArgs, imageRecords);
+    //     await this.sebum_u.saveData(body, analyzedImageArgs, originalImageArgs, imageRecords);
 
-        let promise1 = new Promise(function (resolve, reject) {
-            resolve(
-                res.send({
-                    status: 200,
-                    service: 'Analysis CNDP SKIN Sebum U',
-                    body: {
-                        batch_id: Number(body.batch_id),
-                        args: {
-                            score: body.score,
-                            raw: body.raw,
-                        },
-                    },
-                    originalImage: {
-                        id: originalImageArgs.hash,
-                        url: originalImageArgs.url,
-                    },
-                    analyzedImage: {
-                        id: analyzedImageArgs.hash,
-                        url: analyzedImageArgs.url,
-                    },
-                }),
-            );
-        });
+    //     let promise1 = new Promise(function (resolve, reject) {
+    //         resolve(
+    //             res.send({
+    //                 status: 200,
+    //                 service: 'Analysis CNDP SKIN Sebum U',
+    //                 body: {
+    //                     batch_id: Number(body.batch_id),
+    //                     args: {
+    //                         score: body.score,
+    //                         raw: body.raw,
+    //                     },
+    //                 },
+    //                 originalImage: {
+    //                     id: originalImageArgs.hash,
+    //                     url: originalImageArgs.url,
+    //                 },
+    //                 analyzedImage: {
+    //                     id: analyzedImageArgs.hash,
+    //                     url: analyzedImageArgs.url,
+    //                 },
+    //             }),
+    //         );
+    //     });
 
-        await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
-        const saving = await this.S3Image.uploadImage(originalImage, originalImageArgs.sys_url);
-        let promise2 = new Promise(function (resolve, resject) {
-            resolve(saving);
-        });
+    //     await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
+    //     const saving = await this.S3Image.uploadImage(originalImage, originalImageArgs.sys_url);
+    //     let promise2 = new Promise(function (resolve, resject) {
+    //         resolve(saving);
+    //     });
 
-        promise1
-            .then(function (value) {
-                return promise2;
-            })
-            .catch((error) => {
-                console.log(error);
-                return res.send({
-                    status: 500,
-                    type: 'InternalServerError',
-                    message: 'Internal server error.',
-                    error: error.message,
-                });
-            });
-    }
+    //     promise1
+    //         .then(function (value) {
+    //             return promise2;
+    //         })
+    //         .catch((error) => {
+    //             console.log(error);
+    //             return res.send({
+    //                 status: 500,
+    //                 type: 'InternalServerError',
+    //                 message: 'Internal server error.',
+    //                 error: error.message,
+    //             });
+    //         });
+    // }
 
-    @UseGuards(AuthMiddleware)
-    @ApiBearerAuth('access-token')
-    @ApiConsumes('multipart/form-data')
-    @ApiBody({ type: MoistureDTO })
-    @Post('/sebumT')
-    @UseInterceptors(
-        FileFieldsInterceptor([
-            { name: 'originalImage', maxCount: 1 },
-            { name: 'analyzedImage', maxCount: 1 },
-        ]),
-    )
-    async sebumT(
-        @Res() res: Response,
-        @Body() body: any,
-        @UploadedFiles()
-        file: { originalImage: Express.Multer.File[]; analyzedImage: Express.Multer.File[] },
-    ) {
-        body.batchId = Number(body.batch_id);
-        if (!file['originalImage'][0] || !file['analyzedImage'][0])
-            return res.send({ status: 40002, type: 'BadRequestError', message: 'There is no necassary image file!' });
-        const imageRecords = uuidv4();
+    // @UseGuards(AuthMiddleware)
+    // @ApiBearerAuth('access-token')
+    // @ApiConsumes('multipart/form-data')
+    // @ApiBody({ type: MoistureDTO })
+    // @Post('/sebumT')
+    // @UseInterceptors(
+    //     FileFieldsInterceptor([
+    //         { name: 'originalImage', maxCount: 1 },
+    //         { name: 'analyzedImage', maxCount: 1 },
+    //     ]),
+    // )
+    // async sebumT(
+    //     @Res() res: Response,
+    //     @Body() body: any,
+    //     @UploadedFiles()
+    //     file: { originalImage: Express.Multer.File[]; analyzedImage: Express.Multer.File[] },
+    // ) {
+    //     body.batchId = Number(body.batch_id);
+    //     if (!file['originalImage'][0] || !file['analyzedImage'][0])
+    //         return res.send({ status: 40002, type: 'BadRequestError', message: 'There is no necassary image file!' });
+    //     const imageRecords = uuidv4();
 
-        const originalImage = file.originalImage[0].buffer;
-        const analyzedImage = file.analyzedImage[0].buffer;
+    //     const originalImage = file.originalImage[0].buffer;
+    //     const analyzedImage = file.analyzedImage[0].buffer;
 
-        const analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', '', 'sebumT');
+    //     const analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', '', 'sebumT');
 
-        const originalImageArgs = this.S3Image.getImageArgs('originalImage', '', 'sebumT');
+    //     const originalImageArgs = this.S3Image.getImageArgs('originalImage', '', 'sebumT');
 
-        await this.sebum_t.saveData(body, analyzedImageArgs, originalImageArgs, imageRecords);
+    //     await this.sebum_t.saveData(body, analyzedImageArgs, originalImageArgs, imageRecords);
 
-        let promise1 = new Promise(function (resolve, reject) {
-            resolve(
-                res.send({
-                    status: 200,
-                    service: 'Analysis CNDP SKIN Sebum T',
-                    body: {
-                        batch_id: Number(body.batch_id),
-                        args: {
-                            score: body.score,
-                            raw: body.raw,
-                        },
-                    },
-                    originalImage: {
-                        id: originalImageArgs.hash,
-                        url: originalImageArgs.url,
-                    },
-                    analyzedImage: {
-                        id: analyzedImageArgs.hash,
-                        url: analyzedImageArgs.url,
-                    },
-                }),
-            );
-        });
+    //     let promise1 = new Promise(function (resolve, reject) {
+    //         resolve(
+    //             res.send({
+    //                 status: 200,
+    //                 service: 'Analysis CNDP SKIN Sebum T',
+    //                 body: {
+    //                     batch_id: Number(body.batch_id),
+    //                     args: {
+    //                         score: body.score,
+    //                         raw: body.raw,
+    //                     },
+    //                 },
+    //                 originalImage: {
+    //                     id: originalImageArgs.hash,
+    //                     url: originalImageArgs.url,
+    //                 },
+    //                 analyzedImage: {
+    //                     id: analyzedImageArgs.hash,
+    //                     url: analyzedImageArgs.url,
+    //                 },
+    //             }),
+    //         );
+    //     });
 
-        await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
-        const saving = await this.S3Image.uploadImage(originalImage, originalImageArgs.sys_url);
-        let promise2 = new Promise(function (resolve, resject) {
-            resolve(saving);
-        });
+    //     await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
+    //     const saving = await this.S3Image.uploadImage(originalImage, originalImageArgs.sys_url);
+    //     let promise2 = new Promise(function (resolve, resject) {
+    //         resolve(saving);
+    //     });
 
-        promise1
-            .then(function (value) {
-                return promise2;
-            })
-            .catch((error) => {
-                return res.send({
-                    status: 500,
-                    type: 'InternalServerError',
-                    message: 'Internal server error.',
-                    error: error.message,
-                });
-            });
-    }
+    //     promise1
+    //         .then(function (value) {
+    //             return promise2;
+    //         })
+    //         .catch((error) => {
+    //             return res.send({
+    //                 status: 500,
+    //                 type: 'InternalServerError',
+    //                 message: 'Internal server error.',
+    //                 error: error.message,
+    //             });
+    //         });
+    // }
 
     @UseGuards(AuthMiddleware)
     @ApiBearerAuth('access-token')
@@ -613,104 +604,6 @@ export class AlgoAnalysisController {
                 });
         } catch (e) {
             console.log(e);
-        }
-    }
-
-    @UseGuards(AuthMiddleware)
-    @ApiBearerAuth('access-token')
-    @ApiConsumes('multipart/form-data')
-    @Post('/offline')
-    @ApiBody({ type: OfflineDatasDTO })
-    @UseInterceptors(
-        FileFieldsInterceptor([
-            { name: 'originalImage', maxCount: 1 },
-            { name: 'analyzedImage', maxCount: 1 },
-            { name: 'analyzedImageS', maxCount: 1 },
-            { name: 'analyzedImageM', maxCount: 1 },
-            { name: 'analyzedImageB', maxCount: 1 },
-            { name: 'maskImage', maxCount: 1 },
-            { name: 'maskImageS', maxCount: 1 },
-            { name: 'maskImageM', maxCount: 1 },
-            { name: 'maskImageB', maxCount: 1 },
-            { name: 'analyzedImageRed', maxCount: 1 },
-            { name: 'analyzedImageGreen', maxCount: 1 },
-            { name: 'analyzedImageYellow', maxCount: 1 },
-            { name: 'analyzedImageOrange', maxCount: 1 },
-            { name: 'maskImageYellow', maxCount: 1 },
-            { name: 'maskImageOrange', maxCount: 1 },
-            { name: 'maskImageGreen', maxCount: 1 },
-            { name: 'maskImageBlack', maxCount: 1 },
-        ]),
-    )
-    async offline(
-        @Res() res: Response,
-        @Body() data: any,
-        @UploadedFiles()
-        file: { analyzedImage: Express.Multer.File[]; originalImage: Express.Multer.File[] },
-    ) {
-        try {
-            if (!file['analyzedImage'][0] || !file['originalImage'][0])
-                return res.send({
-                    status: 40002,
-                    type: 'BadRequestError',
-                    message: 'There is no necassary image file!',
-                });
-
-            data.batchId = Number(data.batchId);
-            const imageRecords = uuidv4();
-            // data.task.algoName = String(data.type);
-            // console.log(data);
-
-            const analyzedImage = file.analyzedImage[0].buffer;
-            const originalImage = file.originalImage[0].buffer;
-
-            let imageArg;
-            if (/[0-9]/.test(data.type)) {
-                imageArg = this.AlgoAnalysis.handleCBBImageArg(data);
-            } else {
-                imageArg = this.AlgoAnalysis.handleofflineImageArg(data);
-            }
-
-            await this.AlgoAnalysis.SaveDataFinal(data, imageRecords, imageArg);
-
-            //upload to DB
-            let promise1 = new Promise(function (resolve, reject) {
-                resolve(
-                    res.send({
-                        status: 200,
-                        service: 'Offline Analysis Data saving',
-                        message: 'Data saved to the cloud',
-                    }),
-                );
-            });
-
-            //Upload Images
-            const saving = await this.AlgoAnalysis.saveOfflineImage(data, originalImage, analyzedImage, imageArg);
-
-            let promise2 = new Promise(function (resolve, resject) {
-                resolve(saving);
-            });
-
-            promise1
-                .then(function (value) {
-                    return promise2;
-                })
-                .catch((error) => {
-                    return res.send({
-                        status: 500,
-                        type: 'InternalServerError',
-                        message: 'Internal server error.',
-                        error: error.message,
-                    });
-                });
-        } catch (e) {
-            console.log(e);
-            return res.send({
-                status: 500,
-                type: 'InternalServerError',
-                message: 'Internal server error.',
-                error: e.message,
-            });
         }
     }
 
@@ -880,16 +773,15 @@ export class AlgoAnalysisController {
 
             data.batch_id = Number(data.batchId);
 
-            // data.task = this.AlgoAnalysis.getCBBTaskByAlgoType(Number(data.type));
-            let algo;
-            let algoId;
-            if (/[0-9]/.test(data.type)) {
-                algo = this.AlgoAnalysis.getCBBTaskByAlgoType(Number(data.type));
-                algoId = algo.id;
-            } else {
-                data.task = this.AlgoAnalysis.getTaskByAlgoType(data.type);
-                algoId = await this.AlgoAnalysis.getAlgoID(toLower(data.type));
-            }
+            let algoId = Number(data.algorithmId); //this.AlgoAnalysis.getCBBTaskByAlgoType(Number(data.type));
+
+            // if (/[0-9]/.test(data.algorithmId)) {
+            //     algo = this.AlgoAnalysis.getCBBTaskByAlgoType(Number(data.algorithmId));
+            //     algoId = algo.id;
+            // } else {
+            //     data.task = this.AlgoAnalysis.getTaskByAlgoType(data.algorithmId);
+            //     algoId = await this.AlgoAnalysis.getAlgoID(toLower(data.algorithmId));
+            // }
 
             // const algo = this.AlgoAnalysis.getCBBTaskByAlgoType(data.type);
 
@@ -907,21 +799,14 @@ export class AlgoAnalysisController {
                 scores = data.args.score;
                 raw = data.args.raw;
             }
-            console.log('check score', scores);
-            const savingPromise: Promise<any>[] = [];
+            // const savingPromise: Promise<any>[] = [];
 
             let sum = 0;
             sum = scores.reduce((accumulator, currentValue) => accumulator + currentValue);
             const imageRecords = uuidv4();
-            const computation = this.computation.computationResult(
-                Number(data.type),
-                data?.answers === undefined ? '' : data?.answers,
-                scores,
-            );
-
             const avg = sum / scores.length;
+            const uploadPromises = [];
 
-            console.log(avg);
             for (let i = 0; i < files.analyzedImage?.length; i++) {
                 const imageArg = this.AlgoAnalysis.handleCBBImageArg(data);
                 analyzed.push([
@@ -950,28 +835,29 @@ export class AlgoAnalysisController {
                     JSON.stringify({
                         score: scores[i],
                         raw: raw[i],
-                        computation_score: computation['computation_score']?.toFixed(2),
-                        questionnaire_score: computation['questionnaire_score'].toFixed(2),
                         score_average: avg.toFixed(2),
                         answers: data?.answers === undefined ? '' : data?.answers,
-                        keyWord: computation['keyWord'],
                     }),
                 ]);
 
+                if (files?.originalImage[i].buffer) {
+                    uploadPromises.push(
+                        this.S3Image.uploadFileToS3(files?.originalImage[i].buffer, imageArg.originalImageArgs.sys_url),
+                    );
+                }
+
+                if (files?.analyzedImage[i].buffer) {
+                    uploadPromises.push(
+                        this.S3Image.uploadFileToS3(files?.analyzedImage[i].buffer, imageArg.analyzedImageArgs.sys_url),
+                    );
+                }
                 //  Image saving
-                const savingData = this.AlgoAnalysis.offlineCBBSaveImage(
-                    files?.originalImage[i].buffer,
-                    files?.analyzedImage[i].buffer,
-                    imageArg,
-                    data,
-                );
-                savingPromise.push(savingData);
             }
 
             const saveOriginal = original.map((item) => {
                 returnOriginal.push({
                     batchId: data.batch_id,
-                    algorithm_type: data.type,
+                    algorithm_type: data.algorithmId,
                     score: promitive === true ? JSON.parse(item[7]).score : item[7].score,
                     originalImage: {
                         id: item[3],
@@ -1010,41 +896,20 @@ export class AlgoAnalysisController {
                 };
             });
 
-            const newArray = returnOriginal.map((item, index) => {
-                return {
-                    ...item,
-                    analyzedImage: retunAnalyzed[index].analyzedImage,
-                };
-            });
-
             const savedResult = [...saveAnalyzed, ...saveOriginal];
 
             this.AlgoAnalysis.offlineCBBSaveData(imageRecords, savedResult);
 
-            console.log();
-            let promise1 = new Promise(function (resolve, reject) {
-                resolve(
-                    res.send({
-                        status: 200,
-                        message: 'Success',
-                        body: {
-                            computation_score: computation['computation_score']?.toFixed(2),
-                            questionnaire_score: computation['questionnaire_score']?.toFixed(2),
-                            score_average: avg.toFixed(2),
-                            keyWord: computation['keyWord'],
-                            keyword_id: computation['keyword_id'],
-                            result: [...newArray],
-                        },
-                    }),
-                );
+            Promise.all(uploadPromises).catch((e) => {
+                fs.appendFile('error.log', this.AlgoAnalysis.getErrorLog(data.barch_id), 'utf8', (err) => {
+                    if (err) throw err;
+                });
             });
 
-            await Promise.all(savingPromise).catch((e) => {
-                Promise.all(savingPromise).catch((e) => {
-                    fs.appendFile('error.log', this.AlgoAnalysis.getErrorLog(data.barch_id), 'utf8', (err) => {
-                        if (err) throw err;
-                    });
-                });
+            res.status(201).send({
+                status: 200,
+                service: 'CFA Offline Analysis Data saving',
+                message: 'Data saved to the cloud',
             });
             await this.AlgoAnalysis.updateData(data, imageRecords);
         } catch (error) {

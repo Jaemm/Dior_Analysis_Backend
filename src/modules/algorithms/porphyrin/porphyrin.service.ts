@@ -7,7 +7,6 @@ import { AlgoAnalysisDTO } from 'src/common/Dto/analysis/algoAnalysis.dto';
 import fs from 'fs';
 import { FileUploadService } from '../../../common/FileUpload/fileUpload.service';
 import { BatchAnalysisService } from 'src/modules/analysis/batchAnalysis/batchAnalysis.service';
-import { OfflineDatasDTO } from 'src/common/Dto/analysis/offlineData.dto';
 
 @Injectable()
 export class PorphyrinService {
@@ -256,69 +255,6 @@ export class PorphyrinService {
         await this.S3Image.uploadImage(maskGImage, maskGImageArgs.sys_url);
         await this.S3Image.uploadImage(originalImage, originalImageArgs.sys_url);
         return taskResponse;
-    }
-
-    async offlineSaveData(data: OfflineDatasDTO, imageRecords: any, imageArgs: any) {
-        const analyzedImageArgs = imageArgs.analyzedImageArgs;
-        // const maskImageArgs = imageArgs.maskImageArgs;
-
-        const originalImageArgs = imageArgs.originalImageArgs;
-
-        console.log('argument of image', imageArgs);
-
-        const environment = {
-            deviceModel: data.deviceModel,
-            deviceOS: data.deviceOS,
-            nth_analysis: imageRecords,
-            lat: data.lat,
-            long: data.long,
-            temperature: data.temperature,
-            humidity: data.humidity,
-            uv_index: data.uv_index,
-            appVersion: data.appVersion,
-
-        };
-
-        await this.batchAnalysis.updateEnvironment(data.batchId, environment);
-        const saveSql =
-            'INSERT INTO measurements (batch_id, url, sys_url, hash, type_measurement_id, type_image_id, args, scores) values ($1, $2, $3, $4, $5, $6, $7, $8)';
-        // const saveArgsSql = 'INSERT INTO keratin (batch_id, args) data ($1, $2)';
-        const queries = [
-            {
-                variables: [
-                    data.batchId,
-                    analyzedImageArgs.url,
-                    analyzedImageArgs.sys_url,
-                    analyzedImageArgs.hash,
-                    3,
-                    18,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-            {
-                variables: [
-                    data.batchId,
-                    originalImageArgs.url,
-                    originalImageArgs.sys_url,
-                    originalImageArgs.hash,
-                    3,
-                    21,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    JSON.stringify(data.args),
-                ],
-            },
-        ];
-
-        for (let i = 0; i < queries.length; i++) {
-            this.database.executeQuery(saveSql, queries[i].variables);
-        }
-
-        return 'saved';
     }
 
     async offlinesaveDataImage(originalImage: any, analyzedImage: any, imageArgs: any) {

@@ -17,6 +17,25 @@ export class FileUploadService {
         private readonly configService: ConfigService, // private readonly logger = new Logger(FileUploadService.name),
     ) {}
 
+    async uploadFileToS3(file: Buffer, fileName: string) {
+        const s3 = new S3();
+        return new Promise((resolve, reject) => {
+            const params = {
+                Bucket: this.configService.get('AWS_BUCKET_NAME'),
+                Key: this.configService.get('AWS_PATH') + `${fileName}.jpg`,
+                Body: file,
+            };
+
+            s3.upload(params, (err: any, data: any) => {
+                if (err) {
+                    console.error(`Error uploading file to S3: ${err.message}`);
+                    reject(err);
+                } else {
+                    resolve(data);
+                }
+            });
+        });
+    }
     async uploadImage(fileContent: Buffer, fileName: string) {
         if (this.configService.get('REGION') === 'CHINA') {
             return await this.uploadImageTencent(fileContent, fileName);
@@ -151,3 +170,4 @@ export class FileUploadService {
         });
     }
 }
+

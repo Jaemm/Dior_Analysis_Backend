@@ -37,12 +37,12 @@ async function bootstrap() {
     const hostname = process.env.HOSTNAME || 'localhost';
 
     if (enableSwagger) {
-        const config = new DocumentBuilder()
-            .setTitle('CNDP SKIN')
+        const config = new DocumentBuilder() //sensitivity scabs
+            .setTitle('DIOR CNDP SKIN - VERSION 2')
             .setDescription(
                 '<b>HOST</b><br><br> <b>STAGING SERVER</b>: https://staging.chowis.cloud:3444 <b> <br><br> PRODUCTION SERVER</b>: https://v2-api.chowis.cloud:3441<br><br>' +
                     '<b>ALGO LIST</b><br><br>' +
-                    '1. keratin<br> 2. pores<br> 3. porphyrin<br> 4. sebum<br> 5. shine<br> 6. spots<br> 7. wrinkles<br> 8. sensitivity scabs<br> 9. sensitivity scaling<br> 10. sensitivity redness<br>' +
+                    '1. pores<br> 2. sensitivity<br> 3. impurities<br> 4. wrinkles<br> 5. sebumU<br> 6. sebumT<br> 7. spots<br> 8. skintone<br> 9. shine<br> 10. keratin<br>' +
                     '<b>Remarks: </b> type in <b>/analysis/offlineCBB</b> should be an id matching the number related to each analysis type',
             )
             .setVersion('2.0.0')

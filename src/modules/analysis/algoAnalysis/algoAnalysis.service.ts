@@ -21,7 +21,7 @@ import { SensitivityRednessService } from 'src/modules/algorithms/sensitivityRed
 import { SensitivtyScalingService } from 'src/modules/algorithms/sensitivtyScaling/sensitivtyScaling.service';
 import { FitzSGService } from 'src/modules/algorithms/fitzSG/fitzSG.service';
 import * as moment from 'moment';
-import { OfflineDataCBBDTO, OfflineDatasDTO } from 'src/common/Dto/analysis/offlineData.dto';
+import { OfflineDataCBBDTO } from 'src/common/Dto/analysis/offlineData.dto';
 
 @Injectable()
 export class AlgoAnalysisService {
@@ -90,7 +90,7 @@ export class AlgoAnalysisService {
 
     // getCBBTaskByAlgoType
     getCBBTaskByAlgoType(type: number) {
-        switch (type) {
+        switch (Number(type)) {
             case 1:
                 return { taskName: 'CNDP_SkinKeratin', algoName: 'keratin', id: 11 };
             case 2:
@@ -440,7 +440,7 @@ export class AlgoAnalysisService {
         let analyzedImageArgs;
         let originalImageArgs;
 
-        switch (Number(data.type)) {
+        switch (Number(data.algorithmId)) {
             case 1:
                 analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'keratin');
 
@@ -451,26 +451,48 @@ export class AlgoAnalysisService {
                     originalImageArgs: originalImageArgs,
                 };
             case 2:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'pores');
+                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sensitivity');
 
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'pores');
+                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sensitivity');
                 return {
                     analyzedImageArgs: analyzedImageArgs,
                     originalImageArgs: originalImageArgs,
                 };
             case 3:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'porphyrin');
+                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'impurities');
 
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'porphyrin');
+                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'impurities');
                 return {
                     analyzedImageArgs: analyzedImageArgs,
 
                     originalImageArgs: originalImageArgs,
                 };
             case 4:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sebum');
+                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'wrinkles');
 
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sebum');
+                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'wrinkles');
+
+                return {
+                    analyzedImageArgs: analyzedImageArgs,
+
+                    originalImageArgs: originalImageArgs,
+                };
+
+            case 5:
+                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sebumU');
+
+                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sebumU');
+
+                return {
+                    analyzedImageArgs: analyzedImageArgs,
+
+                    originalImageArgs: originalImageArgs,
+                };
+
+            case 6:
+                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sebumT');
+
+                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sebumT');
 
                 return {
                     analyzedImageArgs: analyzedImageArgs,
@@ -479,18 +501,18 @@ export class AlgoAnalysisService {
                 };
             // case 'sebumT':
             //     return this.sebumT.saveData(data, taskResponse, imageRecords, originalImage);
-            case 5:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'shine');
+            case 7:
+                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'spots');
 
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'shine');
+                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'spots');
                 return {
                     analyzedImageArgs: analyzedImageArgs,
                     originalImageArgs: originalImageArgs,
                 };
-            case 6:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'spots');
+            case 8:
+                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'skintone');
 
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'spots');
+                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'skintone');
                 return {
                     analyzedImageArgs: analyzedImageArgs,
                     originalImageArgs: originalImageArgs,
@@ -508,42 +530,42 @@ export class AlgoAnalysisService {
 
             //     return { analyzedImageArgs: analyzedImageArgs, originalImageArgs: originalImageArgs };
 
-            case 7:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'wrinkles');
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'wrinkles');
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-
-                    originalImageArgs: originalImageArgs,
-                };
-            case 8:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sensitivityscabs');
-
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sensitivityscabs');
-
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-                    originalImageArgs: originalImageArgs,
-                };
             case 9:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sensitivityscabs');
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sensitivityscabs');
-
+                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'oiliness');
+                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'oiliness');
                 return {
                     analyzedImageArgs: analyzedImageArgs,
 
                     originalImageArgs: originalImageArgs,
                 };
             case 10:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sensitivityscabs');
+                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'keratin');
 
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sensitivityscabs');
+                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'keratin');
 
                 return {
                     analyzedImageArgs: analyzedImageArgs,
-
                     originalImageArgs: originalImageArgs,
                 };
+            // case 9:
+            //     analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sensitivityscabs');
+            //     originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sensitivityscabs');
+
+            //     return {
+            //         analyzedImageArgs: analyzedImageArgs,
+
+            //         originalImageArgs: originalImageArgs,
+            //     };
+            // case 10:
+            //     analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sensitivityscabs');
+
+            //     originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sensitivityscabs');
+
+            //     return {
+            //         analyzedImageArgs: analyzedImageArgs,
+
+            //         originalImageArgs: originalImageArgs,
+            //     };
 
             default:
                 throw new Error('No such analysis type');
@@ -564,50 +586,6 @@ export class AlgoAnalysisService {
             };
 
             return responseBody;
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
-    //Data Offline Saving
-
-    saveOfflineData(data: OfflineDatasDTO, imageRecords: any, imageArgs: any) {
-        try {
-            switch (data.type) {
-                case 'keratin' || 1:
-                    return this.keratin.offlineSaveData(data, imageRecords, imageArgs);
-                case 'pores' || 2:
-                    return this.pores.offlineSaveData(data, imageRecords, imageArgs);
-                case 'porphyrin' || 3:
-                    return this.porphyrin.offlineSaveData(data, imageRecords, imageArgs);
-                case 'sebum' || 4:
-                    return this.sebum.offlineSaveData(data, imageRecords, imageArgs);
-                // case 'sebumT':
-                //     return this.sebumT.analysis(data, taskResponse);
-                case 'shine' || 5:
-                    return this.shine.offlineSaveData(data, imageRecords, imageArgs);
-                case 'spots' || 6:
-                    return this.spots.offlineSaveData(data, imageRecords, imageArgs);
-                // case 'skintone' || 7:
-                //     return this.skintone.offlineSaveData(data, imageRecords, imageArgs);
-                // case 'skintone_dior':
-                //     return this.skintone_dior.offlineSaveData(data, imageRecords, imageArgs);
-                case 'wrinkles' || 7:
-                    return this.wrinkles.offlineSaveData(data, imageRecords, imageArgs);
-                case 'sensitivityscabs' || 8:
-                    return this.sensitivityScabs.offlineSaveData(data, imageRecords, imageArgs);
-                case 'sensitivityscaling' || 9:
-                    return this.sensitivityScaling.offlineSaveData(data, imageRecords, imageArgs);
-                case 'sensitivityredness' || 10:
-                    return this.sensitivityredness.offlineSaveData(data, imageRecords, imageArgs);
-                // case 'fitzSG':
-                //     return this.fitzSG.analysis(data, imageRecords, imageArgs);
-                default:
-                    throw new BadRequestException({
-                        status: 400,
-                        message: 'Analysis Type is incorrect',
-                    });
-            }
         } catch (e) {
             console.log(e);
         }
@@ -731,58 +709,6 @@ export class AlgoAnalysisService {
     }
 
     // OfflinesaveDataImage
-    async saveOfflineImage(data: OfflineDatasDTO, originalImage: any, analyzedImage: any, imageArgs: any) {
-        try {
-            switch (data.type) {
-                case 'keratin':
-                    return this.keratin.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-
-                case 'pores':
-                    return this.pores.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-                case 'porphyrin':
-                    return this.porphyrin.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-                case 'sebum':
-                    return this.sebum.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-                // case 'sebumT':
-                //     return this.sebumT.analysis(data, taskResponse);
-                case 'shine':
-                    return this.shine.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-                case 'spots':
-                    return this.spots.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-                case 'skintone':
-                    return this.skintone.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-                // case 'skintone_dior':
-                //     return this.skintone_dior.offlineSaveData(originalImage, analyzedImage, imageArgs);
-                case 'wrinkles':
-                    return this.wrinkles.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-                case 'sensitivityscabs':
-                    return this.sensitivityScabs.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-                case 'sensitivityscaling':
-                    return this.sensitivityScaling.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-                case 'sensitivityredness':
-                    return this.sensitivityredness.offlinesaveDataImage(originalImage, analyzedImage, imageArgs);
-                // case 'fitzSG':
-                //     return this.fitzSG.analysis(originalImage, analyzedImage, imageArgs);
-                default:
-                    throw new BadRequestException({
-                        status: 400,
-                        message: 'Analysis Type is incorrect',
-                    });
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
-    async SaveDataFinal(data: OfflineDatasDTO, imageRecords: any, imageArg: any) {
-        try {
-            await this.saveOfflineData(data, imageRecords, imageArg);
-
-            return 'saved';
-        } catch (e) {
-            console.log(e);
-        }
-    }
 
     async updateEnvironment(batch_id: number, environment: any) {
         try {
@@ -1528,18 +1454,6 @@ export class AlgoAnalysisService {
         );
 
         return result;
-    }
-
-    async offlineCBBSaveImage(originalImage: any, analyzedImage: any, imageArgs: any, data: any) {
-        const analyzedImageArgs = imageArgs.analyzedImageArgs;
-
-        const originalImageArgs = imageArgs.originalImageArgs;
-
-        await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
-        // await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
-        await this.S3Image.uploadImage(originalImage, originalImageArgs.sys_url);
-
-        return 'saved';
     }
 
     async updateData(data: any, imageRecords: string) {

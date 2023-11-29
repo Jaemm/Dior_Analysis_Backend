@@ -7,7 +7,6 @@ import { AlgoAnalysisDTO } from 'src/common/Dto/analysis/algoAnalysis.dto';
 import fs from 'fs';
 import { FileUploadService } from '../../../common/FileUpload/fileUpload.service';
 import { BatchAnalysisService } from 'src/modules/analysis/batchAnalysis/batchAnalysis.service';
-import { OfflineDatasDTO } from 'src/common/Dto/analysis/offlineData.dto';
 
 @Injectable()
 export class SpotsService {
@@ -77,7 +76,14 @@ export class SpotsService {
         return taskResponse;
     }
 
-    async saveData(coputaionResutl: any, data: AlgoAnalysisDTO, taskResponse: any, imageRecords: any, originalImage: any, imageArg: any) {
+    async saveData(
+        coputaionResutl: any,
+        data: AlgoAnalysisDTO,
+        taskResponse: any,
+        imageRecords: any,
+        originalImage: any,
+        imageArg: any,
+    ) {
         const analyzedImage = Buffer.from(taskResponse.img, 'base64');
         const analyzedImageYellow = Buffer.from(taskResponse.yellow, 'base64');
         const analyzedImageOrange = Buffer.from(taskResponse.orange, 'base64');
@@ -111,7 +117,6 @@ export class SpotsService {
 
         taskResponse.computation_score = coputaionResutl.computation_score;
         taskResponse.questionnaire_score = coputaionResutl.questionnaire_score;
-
 
         const environment = {
             deviceModel: data.deviceModel,
@@ -260,68 +265,6 @@ export class SpotsService {
         await this.S3Image.uploadImage(maskImageGreen, maskImageArgsGreen.sys_url);
 
         await this.S3Image.uploadImage(originalImageSave, originalImageArgs.sys_url);
-
-        return 'saved';
-    }
-
-    async offlineSaveData(data: OfflineDatasDTO, imageRecords: any, imageArgs: any) {
-        const analyzedImageArgs = imageArgs.analyzedImageArgs;
-        // const maskImageArgs = imageArgs.maskImageArgs;
-
-        const originalImageArgs = imageArgs.originalImageArgs;
-
-        const environment = {
-            deviceModel: data.deviceModel,
-            deviceOS: data.deviceOS,
-            nth_analysis: imageRecords,
-            lat: data.lat,
-            long: data.long,
-            temperature: data.temperature,
-            humidity: data.humidity,
-            uv_index: data.uv_index,
-            appVersion: data.appVersion,
-
-        };
-
-        await this.batchAnalysis.updateEnvironment(data.batchId, environment);
-        const saveSql =
-            'INSERT INTO measurements (batch_id, url, sys_url, hash, type_measurement_id, type_image_id, args, scores) values ($1, $2, $3, $4, $5, $6, $7, $8)';
-        // const saveArgsSql = 'INSERT INTO keratin (batch_id, args) data ($1, $2)';
-        const queries = [
-            {
-                variables: [
-                    data.batchId,
-                    analyzedImageArgs.url,
-                    analyzedImageArgs.sys_url,
-                    analyzedImageArgs.hash,
-                    8,
-                    18,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-
-            {
-                variables: [
-                    data.batchId,
-                    originalImageArgs.url,
-                    originalImageArgs.sys_url,
-                    originalImageArgs.hash,
-                    8,
-                    21,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    JSON.stringify(data.args),
-                ],
-            },
-        ];
-
-        for (let i = 0; i < queries.length; i++) {
-            this.database.executeQuery(saveSql, queries[i].variables);
-        }
 
         return 'saved';
     }
