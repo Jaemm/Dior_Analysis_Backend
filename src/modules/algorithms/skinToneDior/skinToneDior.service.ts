@@ -27,6 +27,11 @@ export class SkinToneDiorService {
             averageR: taskResponse.averageR,
             averageG: taskResponse.averageG,
             averageB: taskResponse.averageB,
+            deviceModel: data.deviceModel,
+            deviceOS: data.deviceOS,
+            nth_analysis: '',
+            lat: data.lat,
+            long: data.long,
         };
 
         const retObj: any = {
