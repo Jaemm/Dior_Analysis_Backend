@@ -18,12 +18,12 @@ export class SpotsService {
 
     analysis(data: AlgoAnalysisDTO, taskResponse: any, imageArg: any) {
         const analyzedImageArgs = imageArg.analyzedImageArgs;
-        const analyzedImageArgsYellow = imageArg.analyzedImageArgsYellow;
-        const analyzedImageArgsOrange = imageArg.analyzedImageArgsOrange;
-        const analyzedImageArgsGreen = imageArg.analyzedImageArgsGreen;
-        const maskImageArgsYellow = imageArg.maskImageArgsYellow;
-        const maskImageArgsOrange = imageArg.maskImageArgsOrange;
-        const maskImageArgsGreen = imageArg.maskImageArgsGreen;
+        // const analyzedImageArgsYellow = imageArg.analyzedImageArgsYellow;
+        // const analyzedImageArgsOrange = imageArg.analyzedImageArgsOrange;
+        // const analyzedImageArgsGreen = imageArg.analyzedImageArgsGreen;
+        // const maskImageArgsYellow = imageArg.maskImageArgsYellow;
+        // const maskImageArgsOrange = imageArg.maskImageArgsOrange;
+        // const maskImageArgsGreen = imageArg.maskImageArgsGreen;
         const originalImageArgs = imageArg.originalImageArgs;
 
         taskResponse = {
@@ -45,30 +45,30 @@ export class SpotsService {
                 id: originalImageArgs.hash,
                 url: originalImageArgs.url,
             },
-            analyzedImageYellow: {
-                id: analyzedImageArgsYellow.hash,
-                url: analyzedImageArgsYellow.url,
-            },
-            analyzedImageOrange: {
-                id: analyzedImageArgsOrange.hash,
-                url: analyzedImageArgsOrange.url,
-            },
-            analyzedImageGreen: {
-                id: analyzedImageArgsGreen.hash,
-                url: analyzedImageArgsGreen.url,
-            },
-            maskImageYellow: {
-                id: maskImageArgsYellow.hash,
-                url: maskImageArgsYellow.url,
-            },
-            maskImageOrange: {
-                id: maskImageArgsOrange.hash,
-                url: maskImageArgsOrange.url,
-            },
-            maskImageGreen: {
-                id: maskImageArgsGreen.hash,
-                url: maskImageArgsGreen.url,
-            },
+            // analyzedImageYellow: {
+            //     id: analyzedImageArgsYellow.hash,
+            //     url: analyzedImageArgsYellow.url,
+            // },
+            // analyzedImageOrange: {
+            //     id: analyzedImageArgsOrange.hash,
+            //     url: analyzedImageArgsOrange.url,
+            // },
+            // analyzedImageGreen: {
+            //     id: analyzedImageArgsGreen.hash,
+            //     url: analyzedImageArgsGreen.url,
+            // },
+            // maskImageYellow: {
+            //     id: maskImageArgsYellow.hash,
+            //     url: maskImageArgsYellow.url,
+            // },
+            // maskImageOrange: {
+            //     id: maskImageArgsOrange.hash,
+            //     url: maskImageArgsOrange.url,
+            // },
+            // maskImageGreen: {
+            //     id: maskImageArgsGreen.hash,
+            //     url: maskImageArgsGreen.url,
+            // },
         };
 
         taskResponse = { ...taskResponse, ...retObj };
@@ -85,21 +85,21 @@ export class SpotsService {
         imageArg: any,
     ) {
         const analyzedImage = Buffer.from(taskResponse.img, 'base64');
-        const analyzedImageYellow = Buffer.from(taskResponse.yellow, 'base64');
-        const analyzedImageOrange = Buffer.from(taskResponse.orange, 'base64');
-        const analyzedImageGreen = Buffer.from(taskResponse.green, 'base64');
-        const maskImageYellow = Buffer.from(taskResponse.mask_Y, 'base64');
-        const maskImageOrange = Buffer.from(taskResponse.mask_O, 'base64');
-        const maskImageGreen = Buffer.from(taskResponse.mask_G, 'base64');
+        // const analyzedImageYellow = Buffer.from(taskResponse.yellow, 'base64');
+        // const analyzedImageOrange = Buffer.from(taskResponse.orange, 'base64');
+        // const analyzedImageGreen = Buffer.from(taskResponse.green, 'base64');
+        // const maskImageYellow = Buffer.from(taskResponse.mask_Y, 'base64');
+        // const maskImageOrange = Buffer.from(taskResponse.mask_O, 'base64');
+        // const maskImageGreen = Buffer.from(taskResponse.mask_G, 'base64');
         const originalImageSave = originalImage;
 
         const analyzedImageArgs = imageArg.analyzedImageArgs;
-        const analyzedImageArgsYellow = imageArg.analyzedImageArgsYellow;
-        const analyzedImageArgsOrange = imageArg.analyzedImageArgsOrange;
-        const analyzedImageArgsGreen = imageArg.analyzedImageArgsGreen;
-        const maskImageArgsYellow = imageArg.maskImageArgsYellow;
-        const maskImageArgsOrange = imageArg.maskImageArgsOrange;
-        const maskImageArgsGreen = imageArg.maskImageArgsGreen;
+        // const analyzedImageArgsYellow = imageArg.analyzedImageArgsYellow;
+        // const analyzedImageArgsOrange = imageArg.analyzedImageArgsOrange;
+        // const analyzedImageArgsGreen = imageArg.analyzedImageArgsGreen;
+        // const maskImageArgsYellow = imageArg.maskImageArgsYellow;
+        // const maskImageArgsOrange = imageArg.maskImageArgsOrange;
+        // const maskImageArgsGreen = imageArg.maskImageArgsGreen;
         const originalImageArgs = imageArg.originalImageArgs;
 
         delete taskResponse.img;
@@ -140,7 +140,7 @@ export class SpotsService {
                     analyzedImageArgs.url,
                     analyzedImageArgs.sys_url,
                     analyzedImageArgs.hash,
-                    8,
+                    7,
                     18,
                     JSON.stringify({
                         nth_analysis: imageRecords,
@@ -148,20 +148,7 @@ export class SpotsService {
                     null,
                 ],
             },
-            {
-                variables: [
-                    data.batch_id,
-                    analyzedImageArgsYellow.url,
-                    analyzedImageArgsYellow.sys_url,
-                    analyzedImageArgsYellow.hash,
-                    8,
-                    5,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
+
             {
                 variables: [
                     data.batch_id,
@@ -176,93 +163,13 @@ export class SpotsService {
                     JSON.stringify(taskResponse),
                 ],
             },
-            {
-                variables: [
-                    data.batch_id,
-                    analyzedImageArgsOrange.url,
-                    analyzedImageArgsOrange.sys_url,
-                    analyzedImageArgsOrange.hash,
-                    8,
-                    17,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-            {
-                variables: [
-                    data.batch_id,
-                    analyzedImageArgsGreen.url,
-                    analyzedImageArgsGreen.sys_url,
-                    analyzedImageArgsGreen.hash,
-                    8,
-                    14,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-            {
-                variables: [
-                    data.batch_id,
-                    maskImageArgsYellow.url,
-                    maskImageArgsYellow.sys_url,
-                    maskImageArgsYellow.hash,
-                    8,
-                    11,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-            {
-                variables: [
-                    data.batch_id,
-                    maskImageArgsOrange.url,
-                    maskImageArgsOrange.sys_url,
-                    maskImageArgsOrange.hash,
-                    8,
-                    7,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-            {
-                variables: [
-                    data.batch_id,
-                    maskImageArgsGreen.url,
-                    maskImageArgsGreen.sys_url,
-                    maskImageArgsGreen.hash,
-                    8,
-                    13,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
         ];
-
         for (let i = 0; i < queries.length; i++) {
             this.database.executeQuery(saveSql, queries[i].variables);
         }
 
         await this.batchAnalysis.updateEnvironment(data.batch_id, environment);
         await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
-        await this.S3Image.uploadImage(analyzedImageYellow, analyzedImageArgsYellow.sys_url);
-        await this.S3Image.uploadImage(analyzedImageOrange, analyzedImageArgsOrange.sys_url);
-
-        await this.S3Image.uploadImage(analyzedImageGreen, analyzedImageArgsGreen.sys_url);
-
-        await this.S3Image.uploadImage(maskImageYellow, maskImageArgsYellow.sys_url);
-
-        await this.S3Image.uploadImage(maskImageOrange, maskImageArgsOrange.sys_url);
-        await this.S3Image.uploadImage(maskImageGreen, maskImageArgsGreen.sys_url);
 
         await this.S3Image.uploadImage(originalImageSave, originalImageArgs.sys_url);
 

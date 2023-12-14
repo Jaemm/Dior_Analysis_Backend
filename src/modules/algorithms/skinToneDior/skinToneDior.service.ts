@@ -16,7 +16,7 @@ export class SkinToneDiorService {
         private batchAnalysis: BatchAnalysisService,
     ) {}
 
-    analysis(taskResponse: any, originalImageFirstArgs: any, originalImageSecondArgs: any) {
+    analysis(data: any, taskResponse: any, originalImageFirstArgs: any, originalImageSecondArgs: any) {
         // console.log("taskResponse", taskResponse)
 
         taskResponse = {
@@ -30,6 +30,8 @@ export class SkinToneDiorService {
         };
 
         const retObj: any = {
+            batchId: data.batch_id,
+            algorithm_type: data.type,
             originalImageFirst: {
                 id: originalImageFirstArgs.hash,
                 url: originalImageFirstArgs.url,
@@ -39,9 +41,10 @@ export class SkinToneDiorService {
                 id: originalImageSecondArgs.hash,
                 url: originalImageSecondArgs.url,
             },
+            ...taskResponse,
         };
 
-        taskResponse = { ...taskResponse, ...retObj };
+        taskResponse = retObj;
 
         return taskResponse;
     }

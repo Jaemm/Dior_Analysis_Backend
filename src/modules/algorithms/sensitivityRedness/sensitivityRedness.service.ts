@@ -20,7 +20,7 @@ export class SensitivityRednessService {
         // console.log("taskResponse", taskResponse)
 
         const analyzedImageArgs = imageArgs.analyzedImageArgs;
-        const maskImageArgs = imageArgs.maskImageArgs;
+        // const maskImageArgs = imageArgs.maskImageArgs;
 
         const originalImageArgs = imageArgs.originalImageArgs;
 
@@ -35,10 +35,10 @@ export class SensitivityRednessService {
                 id: analyzedImageArgs.hash,
                 url: analyzedImageArgs.url,
             },
-            maskImage: {
-                id: maskImageArgs.hash,
-                url: maskImageArgs.url,
-            },
+            // maskImage: {
+            //     id: maskImageArgs.hash,
+            //     url: maskImageArgs.url,
+            // },
             originalImage: {
                 id: originalImageArgs.hash,
                 url: originalImageArgs.url,
@@ -59,10 +59,10 @@ export class SensitivityRednessService {
         imageArgs: any,
     ) {
         const analyzedImage = Buffer.from(taskResponse.img, 'base64');
-        const maskImage = Buffer.from(taskResponse.mask, 'base64');
+        // const maskImage = Buffer.from(taskResponse.mask, 'base64');
         const originalImageSave = Buffer.from(originalImage, 'base64');
         const analyzedImageArgs = imageArgs.analyzedImageArgs;
-        const maskImageArgs = imageArgs.maskImageArgs;
+        // const maskImageArgs = imageArgs.maskImageArgs;
 
         const originalImageArgs = imageArgs.originalImageArgs;
 
@@ -99,7 +99,7 @@ export class SensitivityRednessService {
                     analyzedImageArgs.url,
                     analyzedImageArgs.sys_url,
                     analyzedImageArgs.hash,
-                    12,
+                    2,
                     18,
                     JSON.stringify({
                         nth_analysis: imageRecords,
@@ -107,22 +107,22 @@ export class SensitivityRednessService {
                     null,
                 ],
             },
-            {
-                // maskImgae
+            // {
+            // maskImgae
 
-                variables: [
-                    data.batch_id,
-                    maskImageArgs.url,
-                    maskImageArgs.sys_url,
-                    maskImageArgs.hash,
-                    12,
-                    15,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
+            //     variables: [
+            //         data.batch_id,
+            //         maskImageArgs.url,
+            //         maskImageArgs.sys_url,
+            //         maskImageArgs.hash,
+            //         12,
+            //         15,
+            //         JSON.stringify({
+            //             nth_analysis: imageRecords,
+            //         }),
+            //         null,
+            //     ],
+            // },
             {
                 variables: [
                     data.batch_id,
@@ -146,7 +146,7 @@ export class SensitivityRednessService {
         await this.batchAnalysis.updateEnvironment(data.batch_id, environment);
 
         await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
-        await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
+        // await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
         await this.S3Image.uploadImage(originalImageSave, originalImageArgs.sys_url);
 
         return 'saved';

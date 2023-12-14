@@ -17,7 +17,7 @@ export class SebumTService {
                     analyzedImageArgs.url,
                     analyzedImageArgs.sys_url,
                     analyzedImageArgs.hash,
-                    9,
+                    6,
                     18,
                     JSON.stringify({ nth_analysis: imageRecords }),
                     null,
@@ -29,7 +29,7 @@ export class SebumTService {
                     originalImageArgs.url,
                     originalImageArgs.sys_url,
                     originalImageArgs.hash,
-                    9,
+                    6,
                     21,
                     JSON.stringify({ nth_analysis: imageRecords }),
                     JSON.stringify({

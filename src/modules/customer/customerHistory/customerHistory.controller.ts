@@ -1,5 +1,16 @@
-import { Controller, Body, Get, Post, UseInterceptors, UploadedFiles, Res, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+    Controller,
+    Body,
+    Get,
+    Post,
+    UseInterceptors,
+    UploadedFiles,
+    Res,
+    Param,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { query, Request, response, Response } from 'express';
 import { GetcustomerHistoryDTO } from 'src/common/Dto/customer/analysisHistory/analysisHistory.dto';
 import { AnanalysisHistoryService } from './customerHistory.service';
@@ -11,6 +22,7 @@ import { countCustomerDto } from 'src/common/Dto/analysis/algoAnalysis.dto';
 export class AnanalysisHistoryController {
     constructor(private readonly getAnalysisHistory: AnanalysisHistoryService) {}
 
+    @ApiExcludeEndpoint()
     @Get('/:customer_id/analysis-history/')
     async getcustomerHistory(
         // @Body() data: GetcustomerHistoryDTO,
@@ -24,6 +36,7 @@ export class AnanalysisHistoryController {
         return res.status(200).send(result);
     }
 
+    @ApiExcludeEndpoint()
     @Get('/:customer_id/analysis-history/details')
     async getcustomerHistoryDetail(@Res() res: Response, @Query() query: GetcustomerHistoryDTO) {
         const result = await this.getAnalysisHistory.getcustomerHistoryDetail(query);
@@ -31,6 +44,7 @@ export class AnanalysisHistoryController {
         return res.status(200).send(result);
     }
 
+    @ApiExcludeEndpoint()
     @Get('/:customer_id/analysis-history/analysis-infor')
     async getcustomerAnalysisInfor(@Query() query: any, @Res() res: Response) {
         try {
@@ -51,7 +65,5 @@ export class AnanalysisHistoryController {
             });
         }
     }
-
-
 }
 

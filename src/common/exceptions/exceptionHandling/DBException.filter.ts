@@ -2,33 +2,23 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from
 import { Response, Request } from 'express';
 import * as fs from 'fs';
 import { CustomHttpExceptionResponse, HttpExceptionResponse } from './interface/http-exception.interface';
+import { QueryFailedError } from 'typeorm';
+import { BaseExceptionFilter } from '@nestjs/core';
 
-@Catch(Error)
-export class AllExceptionsFilter implements ExceptionFilter {
-    catch(exception: HttpException, host: ArgumentsHost) {
+@Catch(QueryFailedError)
+export class TypeORMExceptionFilter extends BaseExceptionFilter {
+    catch(exception: QueryFailedError, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
-        let status: HttpStatus;
+        const status = HttpStatus.INTERNAL_SERVER_ERROR;
         let errorMessage: string;
-        console.log(exception);
-        // if (exception instanceof HttpException) {
-        status = exception instanceof HttpException ? exception?.getStatus() : 500;
-        const errorResponse_: any = exception.getResponse();
 
-        errorMessage = (errorResponse_ as HttpExceptionResponse)?.error || exception?.message;
+        const errorResponse_: any = 'Database error occurred';
 
-        const message = Array.isArray((errorResponse_ as any)['message'])
-            ? (errorResponse_ as any)['message'][0]
-            : (errorResponse_ as any)['message'];
-        // (errorResponse_ as HttpExceptionResponse)['message'][0] || '';
+        errorMessage = 'INTERNAL SERVER ERROR';
 
-        // }
-        // else {
-        //     status = HttpStatus.INTERNAL_SERVER_ERROR;
-
-        //     errorMessage = 'Database Error!';
-        // }
+        const message = (errorResponse_ as HttpExceptionResponse)?.error || exception?.message;
 
         const errorResponse = this.getErrorResponse(status, errorMessage, message, request);
 

@@ -100,7 +100,7 @@ export class KeratinService {
                     analyzedImageArgs.url,
                     analyzedImageArgs.sys_url,
                     analyzedImageArgs.hash,
-                    11,
+                    10,
                     18,
                     JSON.stringify({
                         nth_analysis: imageRecords,
@@ -108,29 +108,29 @@ export class KeratinService {
                     null,
                 ],
             },
-            {
-                // maskImgae
+            // {
+            //     // maskImgae
 
-                variables: [
-                    data.batch_id,
-                    maskImageArgs.url,
-                    maskImageArgs.sys_url,
-                    maskImageArgs.hash,
-                    11,
-                    15,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
+            //     variables: [
+            //         data.batch_id,
+            //         maskImageArgs.url,
+            //         maskImageArgs.sys_url,
+            //         maskImageArgs.hash,
+            //         10,
+            //         15,
+            //         JSON.stringify({
+            //             nth_analysis: imageRecords,
+            //         }),
+            //         null,
+            //     ],
+            // },
             {
                 variables: [
                     data.batch_id,
                     originalImageArgs.url,
                     originalImageArgs.sys_url,
                     originalImageArgs.hash,
-                    11,
+                    10,
                     21,
                     JSON.stringify({
                         nth_analysis: imageRecords,
@@ -145,7 +145,7 @@ export class KeratinService {
         }
 
         await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
-        await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
+        // await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
         await this.S3Image.uploadImage(originalImageSave, originalImageArgs.sys_url);
 
         return 'saved';

@@ -142,8 +142,8 @@ export class AlgoAnalysisService {
                     return this.spots.analysis(data, taskResponse, imageArgs);
                 case 'skintone':
                     return this.skintone.analysis(data, taskResponse, imageArgs);
-                case 'skintone_dior':
-                    return this.skintone_dior.analysis(data, taskResponse, imageArgs);
+                // case 'skintone_dior':
+                //     return this.skintone_dior.analysis(data, taskResponse, imageArgs);
                 case 'wrinkles':
                     return this.wrinkles.analysis(data, taskResponse, imageArgs);
                 case 'sensitivityscabs':
@@ -510,9 +510,9 @@ export class AlgoAnalysisService {
                     originalImageArgs: originalImageArgs,
                 };
             case 8:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'skintone');
+                analyzedImageArgs = this.S3Image.getImageArgs('originalImage1', data.type, 'skintone');
 
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'skintone');
+                originalImageArgs = this.S3Image.getImageArgs('originalImage2', data.type, 'skintone');
                 return {
                     analyzedImageArgs: analyzedImageArgs,
                     originalImageArgs: originalImageArgs,
@@ -1718,6 +1718,25 @@ export class AlgoAnalysisService {
 
     isPrimitive(obj: any): boolean {
         return (typeof obj !== 'object' && typeof obj !== 'function') || obj === null;
+    }
+
+    // analysis Flag
+    async analysisFlag(batch_id: number | string, status: any): Promise<any> {
+        const stat = {
+            status: status,
+        };
+        const result = await this.database.executeQuery(
+            `
+              UPDATE analysis
+              SET args = args::jsonb || $1::jsonb
+              WHERE batch_id = $2;
+              `,
+            [JSON.stringify(stat), batch_id],
+        );
+
+        console.log(result);
+
+        return result;
     }
 }
 

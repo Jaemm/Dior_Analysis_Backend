@@ -167,5 +167,213 @@ export class OfflineDataCBBDTO {
     @ValidateNested()
     @Type(() => MultiArgsDTO)
     args: MultiArgsDTO;
+
+    //save the skintone
+}
+
+export class SkinToneDTO {
+    @ApiProperty({
+        type: 'array',
+        items: { type: 'string', format: 'binary' },
+    })
+    @IsNotEmpty()
+    // @IsArray()
+    image1: string[];
+
+    @ApiProperty({
+        type: 'array',
+        items: { type: 'string', format: 'binary' },
+    })
+    @IsNotEmpty()
+    // @IsArray()
+    image2: string[];
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 5462,
+    })
+    @IsNotEmpty()
+    batch_id?: number;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 'Samsung',
+    })
+    deviceModel?: string | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 'Android',
+    })
+    deviceOS?: String | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 45,
+    })
+    lat?: number | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 0,
+    })
+    long?: number | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 20,
+    })
+    temperature?: number | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 0,
+    })
+    humidity?: number | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 20,
+    })
+    uv_index?: number | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 1,
+    })
+    positionNumber: number;
+}
+
+export class SkinToneUploadDTO {
+    @ApiProperty({
+        type: 'array',
+        items: { type: 'string', format: 'binary' },
+    })
+    @IsNotEmpty()
+    // @IsArray()
+    image1: string[];
+
+    @ApiProperty({
+        type: 'array',
+        items: { type: 'string', format: 'binary' },
+    })
+    @IsNotEmpty()
+    // @IsArray()
+    image2: string[];
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 5462,
+    })
+    @IsNotEmpty()
+    batchId?: number;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 'Samsung',
+    })
+    deviceModel?: string | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 'Android',
+    })
+    deviceOS?: String | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 45,
+    })
+    lat?: number | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 0,
+    })
+    long?: number | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 20,
+    })
+    temperature?: number | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 0,
+    })
+    humidity?: number | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 20,
+    })
+    uv_index?: number | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: '4.5N',
+    })
+    shade: string;
+
+    @ApiPropertyOptional({
+        type: String,
+        description: 'This is required',
+        example: '105,95,85,103,130,135,39,54,107',
+    })
+    @IsOptional()
+    raw1: string;
+
+    @ApiPropertyOptional({
+        type: String,
+        description: 'This is required',
+        example: '105,90,78,99,132,137,30,67,106',
+    })
+    @IsOptional()
+    raw2: string;
+
+    @ApiPropertyOptional({
+        type: String,
+        description: 'Only for skin tone',
+        example: '105',
+    })
+    @IsOptional()
+    averageR: string;
+
+    @ApiPropertyOptional({
+        type: String,
+        description: 'Only for skin tone',
+        example: '92',
+    })
+    @IsOptional()
+    averageG: string;
+
+    @ApiPropertyOptional({
+        type: String,
+        description: 'Only for skin tone',
+        example: '81',
+    })
+    @IsOptional()
+    averageB: string;
+
+    algorithmId: number;
 }
 
