@@ -27,6 +27,11 @@ export class KeratinService {
             ver: taskResponse.ver,
             score: taskResponse.score,
             raw: taskResponse.raw,
+            deviceModel: data.deviceModel,
+            deviceOS: data.deviceOS,
+            nth_analysis: '',
+            lat: data.lat,
+            long: data.long,
         };
 
         const retObj: any = {

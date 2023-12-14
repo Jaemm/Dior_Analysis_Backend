@@ -21,11 +21,14 @@ export class WrinklesService {
         const analyzedImageArgs = imageArgs.analyzedImageArgs;
 
         const originalImageArgs = imageArgs.originalImageArgs;
+        const maskImageArgsYellow = imageArgs.maskImageArgsYellow;
+        const maskImageArgsOrange = imageArgs.maskImageArgsOrange;
+        const maskImageArgsGreen = imageArgs.maskImageArgsGreen;
+        const maskImageArgsBlack = imageArgs.maskImageArgsBlack;
         taskResponse = {
             ver: taskResponse.ver,
             score: taskResponse.score,
             raw: taskResponse.raw,
-
             score_Y: taskResponse.score_Y,
             score_O: taskResponse.score_O,
             score_G: taskResponse.score_G,
@@ -43,6 +46,11 @@ export class WrinklesService {
             r7: taskResponse.r7,
             r8: taskResponse.r8,
             r9: taskResponse.r9,
+            deviceModel: data.deviceModel,
+            deviceOS: data.deviceOS,
+            nth_analysis: '',
+            lat: data.lat,
+            long: data.long,
         };
         const retObj: any = {
             originalImage: {
@@ -52,6 +60,23 @@ export class WrinklesService {
             analyzedImage: {
                 id: analyzedImageArgs.hash,
                 url: analyzedImageArgs.url,
+            },
+
+            maskImageYellow: {
+                id: maskImageArgsYellow.hash,
+                url: maskImageArgsYellow.url,
+            },
+            maskImageOrange: {
+                id: maskImageArgsOrange.hash,
+                url: maskImageArgsYellow.url,
+            },
+            maskImageGreen: {
+                id: maskImageArgsGreen.hash,
+                url: maskImageArgsYellow.url,
+            },
+            maskImageBlack: {
+                id: maskImageArgsBlack.hash,
+                url: maskImageArgsYellow.url,
             },
         };
 
@@ -143,6 +168,64 @@ export class WrinklesService {
                     JSON.stringify(taskResponse),
                 ],
             },
+            // HERE
+            {
+                variables: [
+                    data.batch_id,
+                    maskImageArgsYellow.url,
+                    maskImageArgsYellow.sys_url,
+                    maskImageArgsYellow.hash,
+                    4,
+                    11,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    JSON.stringify(taskResponse),
+                ],
+            },
+            {
+                variables: [
+                    data.batch_id,
+                    maskImageArgsOrange.url,
+                    maskImageArgsOrange.sys_url,
+                    maskImageArgsOrange.hash,
+                    4,
+                    7,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    JSON.stringify(taskResponse),
+                ],
+            },
+            {
+                variables: [
+                    data.batch_id,
+                    maskImageArgsGreen.url,
+                    maskImageArgsGreen.sys_url,
+                    maskImageArgsGreen.hash,
+                    4,
+                    13,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    JSON.stringify(taskResponse),
+                ],
+            },
+            //
+            {
+                variables: [
+                    data.batch_id,
+                    maskImageArgsBlack.url,
+                    maskImageArgsBlack.sys_url,
+                    maskImageArgsBlack.hash,
+                    4,
+                    20,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    JSON.stringify(taskResponse),
+                ],
+            },
         ];
         for (let i = 0; i < queries.length; i++) {
             this.database.executeQuery(saveSql, queries[i].variables);
@@ -150,6 +233,11 @@ export class WrinklesService {
 
         await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
         await this.S3Image.uploadImage(originalImageSave, originalImageArgs.sys_url);
+
+        await this.S3Image.uploadImage(maskImageYellow, maskImageArgsYellow.sys_url);
+        await this.S3Image.uploadImage(maskImageOrange, maskImageArgsOrange.sys_url);
+        await this.S3Image.uploadImage(maskImageGreen, maskImageArgsGreen.sys_url);
+        await this.S3Image.uploadImage(maskImageBlack, maskImageArgsBlack.sys_url);
 
         return 'saved';
     }

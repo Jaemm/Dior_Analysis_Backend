@@ -20,7 +20,7 @@ export class ShineService {
         // console.log("taskResponse", taskResponse)
 
         const analyzedImageArgs = imageArgs.analyzedImageArgs;
-        // const maskImageArgs = imageArgs.maskImageArgs;
+        const maskImageArgs = imageArgs.maskImageArgs;
 
         const originalImageArgs = imageArgs.originalImageArgs;
 
@@ -28,6 +28,11 @@ export class ShineService {
             ver: taskResponse.ver,
             score: taskResponse.score,
             raw: taskResponse.raw,
+            deviceModel: data.deviceModel,
+            deviceOS: data.deviceOS,
+            nth_analysis: '',
+            lat: data.lat,
+            long: data.long,
         };
 
         const retObj: any = {
@@ -35,10 +40,10 @@ export class ShineService {
                 id: analyzedImageArgs.hash,
                 url: analyzedImageArgs.url,
             },
-            // maskImage: {
-            //     id: maskImageArgs.hash,
-            //     url: maskImageArgs.url,
-            // },
+            maskImage: {
+                id: maskImageArgs.hash,
+                url: maskImageArgs.url,
+            },
             originalImage: {
                 id: originalImageArgs.hash,
                 url: originalImageArgs.url,
@@ -110,22 +115,22 @@ export class ShineService {
                     null,
                 ],
             },
-            // {
-            //     // maskImgae
+            {
+                // maskImgae
 
-            //     variables: [
-            //         data.batch_id,
-            //         maskImageArgs.url,
-            //         maskImageArgs.sys_url,
-            //         maskImageArgs.hash,
-            //         10,
-            //         15,
-            //         JSON.stringify({
-            //             nth_analysis: imageRecords,
-            //         }),
-            //         null,
-            //     ],
-            // },
+                variables: [
+                    data.batch_id,
+                    maskImageArgs.url,
+                    maskImageArgs.sys_url,
+                    maskImageArgs.hash,
+                    10,
+                    15,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    null,
+                ],
+            },
             {
                 variables: [
                     data.batch_id,
@@ -148,7 +153,7 @@ export class ShineService {
         await this.batchAnalysis.updateEnvironment(data.batch_id, environment);
 
         await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
-        // await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
+        await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
         await this.S3Image.uploadImage(originalImageSave, originalImageArgs.sys_url);
         return 'saved';
     }
