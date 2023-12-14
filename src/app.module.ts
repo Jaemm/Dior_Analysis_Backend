@@ -11,6 +11,8 @@ import { CustomerModule } from './modules/customer/customer.module';
 import { BullModule } from '@nestjs/bull';
 import { AuthMiddleware } from './common/middleWare/authMiddlware/auth.middleware';
 import { TimingMiddleware } from './common/middleWare/timingMiddleware/timing.middleware';
+import { ProductRecommendationModule } from './modules/productRecommendation/productRecommendation.module';
+import { EmailModule } from './modules/email/email.module';
 
 @Module({
     imports: [
@@ -32,6 +34,8 @@ import { TimingMiddleware } from './common/middleWare/timingMiddleware/timing.mi
         HistoryModule,
         AnalysisModule,
         CustomerModule,
+        ProductRecommendationModule,
+        EmailModule,
     ],
     controllers: [],
     providers: [
@@ -47,6 +51,13 @@ export class AppModule {
     // Timing MiddleWare
     configure(consumer: MiddlewareConsumer) {
         consumer.apply(TimingMiddleware).forRoutes('*');
+        consumer
+            .apply(AuthMiddleware)
+            .exclude(
+                { path: 'web-result/(.*)', method: RequestMethod.ALL },
+                { path: 'image/(.*)', method: RequestMethod.GET },
+            )
+            .forRoutes('*');
     }
 }
 

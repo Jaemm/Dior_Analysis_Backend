@@ -15,8 +15,6 @@ export class WebResultController {
 
             const avg = await this.webResult.webResultAverage(batch_id);
 
-            const skinAge = await this.webResult.getSkinAge(batch_id);
-
             // console.log(result);
             let moistureT = null;
             let moistureU = null;
@@ -40,51 +38,12 @@ export class WebResultController {
                     if (result[i]['measurement'] === avg[j].measurement) {
                         result[i]['avg_value'] = parseFloat(avg[j].avg);
                         // result[i]['computation_score'] = parseFloat(avg[i].computation_score);
-                        result[i]['keyword_value'] = avg[j]['keyword_value'];
-                        result[i]['keyword_id'] = parseFloat(avg[j].keyword_id);
-                    }
-
-                    if (result[i]['computation_score']) {
-                        result[i]['computation_score'] = Number(result[i]['computation_score']);
+                        // result[i]['keyword_value'] = avg[j]['keyword_value'];
+                        // result[i]['keyword_id'] = parseFloat(avg[j].keyword_id);
                     }
                 }
             }
 
-            const condition = this.webResult.skinCondition(
-                Number(moistureT),
-                Number(moistureU),
-                Number(sebumT),
-                Number(sebumU),
-            );
-            const conditionResult = this.webResult.check(condition.moisture, condition.sebum);
-
-            if (moistureT !== null || moistureU !== null || sebumT !== null || sebumU !== null) {
-                result.push({
-                    measurement: 'Skin Condition',
-                    value: null,
-                    date: null,
-                    time: null,
-                    original_image_url: null,
-                    analyzed_image_url: null,
-                    avg_value: null,
-                    keyword_value: conditionResult.keyword_value,
-                    keyword_id: conditionResult.keyword_id,
-                });
-            }
-
-            if (skinAge[0]?.skin_age) {
-                result.push({
-                    measurement: 'SkinAge',
-                    value: Number(skinAge[0]?.skin_age),
-                    date: skinAge[0]?.date,
-                    time: skinAge[0]?.time,
-                    original_image_url: null,
-                    analyzed_image_url: null,
-                    avg_value: null,
-                    keyword_value: Number(skinAge[0]?.skin_age),
-                    keyword_id: null,
-                });
-            }
             return res.status(200).json({
                 status: 200,
                 service: 'getAnalysisData for WebResult',

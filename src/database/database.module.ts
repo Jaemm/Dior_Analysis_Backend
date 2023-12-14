@@ -11,16 +11,25 @@ config();
 
 const configService = new ConfigService();
 
-const databasePoolFactory = async () => {
-    return new Pool({
+const combinedDatabasePoolFactory = async () => {
+    const primaryPool = new Pool({
         user: configService.get('POSTGRES_USER'),
         host: configService.get('POSTGRES_HOST'),
         database: configService.get('POSTGRES_DB'),
         password: configService.get('POSTGRES_PASSWORD'),
         port: configService.get('POSTGRES_PORT'),
     });
-};
 
+    const secondPool = new Pool({
+        user: configService.get('POSTGRES_USER'),
+        host: configService.get('POSTGRES_HOST'),
+        database: configService.get('POSTGRES_DIOR_DB'),
+        password: configService.get('POSTGRES_PASSWORD_DIOR'),
+        port: configService.get('POSTGRES_PORT'),
+    });
+
+    return { primaryPool, secondPool };
+};
 // @Injectable()
 // @Global()
 @Module({
@@ -28,8 +37,13 @@ const databasePoolFactory = async () => {
         {
             provide: 'DATABASE_POOL',
             inject: [ConfigService],
-            useFactory: databasePoolFactory,
+            useFactory: combinedDatabasePoolFactory,
         },
+        // {
+        //     provide: 'DATABASE_POOL',
+        //     inject: [ConfigService],
+        //     useFactory: DiorDBPoolFactory,
+        // },
         DatabaseService,
     ],
     exports: [DatabaseService],
@@ -39,9 +53,17 @@ export class DatabaseModule implements OnApplicationShutdown {
 
     constructor(private readonly moduleRef: ModuleRef) {}
 
+    // onApplicationShutdown(signal?: string) {
+    //     this.logger.log(`Shotting down ${signal}`);
+    //     const pool = this.moduleRef.get('DATABASE_POOL') as Pool;
+    //     return pool.end;
+    // }
+
     onApplicationShutdown(signal?: string) {
+        // Handle shutdown of both database pools if needed
         this.logger.log(`Shotting down ${signal}`);
-        const pool = this.moduleRef.get('DATABASE_POOL') as Pool;
-        return pool.end;
+        const combinedDatabasePool = this.moduleRef.get('DATABASE_POOL') as any;
+        return Promise.all([combinedDatabasePool.primaryPool.end(), combinedDatabasePool.secondPool.end()]);
     }
 }
+

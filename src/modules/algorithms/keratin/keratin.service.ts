@@ -7,9 +7,7 @@ import { AlgoAnalysisDTO } from 'src/common/Dto/analysis/algoAnalysis.dto';
 import fs from 'fs';
 import { FileUploadService } from '../../../common/FileUpload/fileUpload.service';
 import { BatchAnalysisService } from 'src/modules/analysis/batchAnalysis/batchAnalysis.service';
-import { OfflineDataCBBDTO, OfflineDatasDTO } from 'src/common/Dto/analysis/offlineData.dto';
 
-@Injectable()
 export class KeratinService {
     constructor(
         private database: DatabaseService,
@@ -102,7 +100,7 @@ export class KeratinService {
                     analyzedImageArgs.url,
                     analyzedImageArgs.sys_url,
                     analyzedImageArgs.hash,
-                    11,
+                    10,
                     18,
                     JSON.stringify({
                         nth_analysis: imageRecords,
@@ -110,29 +108,29 @@ export class KeratinService {
                     null,
                 ],
             },
-            {
-                // maskImgae
+            // {
+            //     // maskImgae
 
-                variables: [
-                    data.batch_id,
-                    maskImageArgs.url,
-                    maskImageArgs.sys_url,
-                    maskImageArgs.hash,
-                    11,
-                    15,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
+            //     variables: [
+            //         data.batch_id,
+            //         maskImageArgs.url,
+            //         maskImageArgs.sys_url,
+            //         maskImageArgs.hash,
+            //         10,
+            //         15,
+            //         JSON.stringify({
+            //             nth_analysis: imageRecords,
+            //         }),
+            //         null,
+            //     ],
+            // },
             {
                 variables: [
                     data.batch_id,
                     originalImageArgs.url,
                     originalImageArgs.sys_url,
                     originalImageArgs.hash,
-                    11,
+                    10,
                     21,
                     JSON.stringify({
                         nth_analysis: imageRecords,
@@ -147,70 +145,8 @@ export class KeratinService {
         }
 
         await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
-        await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
+        // await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
         await this.S3Image.uploadImage(originalImageSave, originalImageArgs.sys_url);
-
-        return 'saved';
-    }
-
-    async offlineSaveData(data: OfflineDatasDTO, imageRecords: any, imageArgs: any) {
-        const analyzedImageArgs = imageArgs.analyzedImageArgs;
-        // const maskImageArgs = imageArgs.maskImageArgs;
-
-        const originalImageArgs = imageArgs.originalImageArgs;
-
-        const environment = {
-            deviceModel: data.deviceModel,
-            deviceOS: data.deviceOS,
-            nth_analysis: imageRecords,
-            lat: data.lat,
-            long: data.long,
-            temperature: data.temperature,
-            humidity: data.humidity,
-            uv_index: data.uv_index,
-            appVersion: data.appVersion,
-
-        };
-
-        await this.batchAnalysis.updateEnvironment(data.batchId, environment);
-        const saveSql =
-            'INSERT INTO measurements (batch_id, url, sys_url, hash, type_measurement_id, type_image_id, args, scores) values ($1, $2, $3, $4, $5, $6, $7, $8)';
-        // const saveArgsSql = 'INSERT INTO keratin (batch_id, args) data ($1, $2)';
-        const queries = [
-            {
-                variables: [
-                    data.batchId,
-                    analyzedImageArgs.url,
-                    analyzedImageArgs.sys_url,
-                    analyzedImageArgs.hash,
-                    11,
-                    18,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-
-            {
-                variables: [
-                    data.batchId,
-                    originalImageArgs.url,
-                    originalImageArgs.sys_url,
-                    originalImageArgs.hash,
-                    11,
-                    21,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    JSON.stringify(data.args),
-                ],
-            },
-        ];
-
-        for (let i = 0; i < queries.length; i++) {
-            this.database.executeQuery(saveSql, queries[i].variables);
-        }
 
         return 'saved';
     }
@@ -227,3 +163,4 @@ export class KeratinService {
         return 'saved';
     }
 }
+

@@ -27,6 +27,8 @@ import { AuthMiddleware } from 'src/common/middleWare/authMiddlware/auth.middlew
 import { WebResultController } from './webResult/webResult.controller';
 import { WebResultService } from './webResult/webResult.service';
 import { ComputationService } from '../algorithms/computation/computation.service';
+import { QuestionsService } from './questions/questions.service';
+import { QuestionsController } from './questions/questions.controller';
 
 @Module({
     imports: [
@@ -35,7 +37,7 @@ import { ComputationService } from '../algorithms/computation/computation.servic
             name: 'dataSaving',
         }),
     ],
-    controllers: [AlgoAnalysisController, WebResultController],
+    controllers: [AlgoAnalysisController, WebResultController, QuestionsController],
     providers: [
         ConfigService,
         FileUploadService,
@@ -60,16 +62,17 @@ import { ComputationService } from '../algorithms/computation/computation.servic
         SebumUService,
         WebResultService,
         ComputationService,
+        QuestionsService,
         // UploadProcessor,
     ],
 })
 export class AnalysisModule {
     // Auth Middleware
-    configure(consumer: MiddlewareConsumer) {
-        consumer
-            .apply(AuthMiddleware)
-            // .exclude({ path: 'analysis', method: RequestMethod.POST })
-            .forRoutes('analysis');
-    }
+    // configure(consumer: MiddlewareConsumer) {
+    //     consumer
+    //         .apply(AuthMiddleware)
+    //         // .exclude({ path: 'analysis', method: RequestMethod.POST })
+    //         .forRoutes('analysis');
+    // }
 }
 

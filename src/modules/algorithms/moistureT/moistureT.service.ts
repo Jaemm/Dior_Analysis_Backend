@@ -11,10 +11,11 @@ export class MoistureTService {
     saveData(data: AlgoAnalysisDTO) {
         const saveSql =
             'INSERT INTO measurements (batch_id, type_measurement_id, type_image_id, scores) values ($1, $2, $3, $4)';
-        const queries = [data.batch_id, 16, 21, JSON.stringify(data)];
+        const queries = [data.batch_id, 11, 21, JSON.stringify(data)];
 
         this.database.executeQuery(saveSql, queries);
 
         return data;
     }
 }
+

@@ -8,7 +8,6 @@ import fs from 'fs';
 import { FileUploadService } from '../../../common/FileUpload/fileUpload.service';
 import { BatchAnalysisService } from 'src/modules/analysis/batchAnalysis/batchAnalysis.service';
 import _ from 'lodash';
-import { OfflineDatasDTO } from 'src/common/Dto/analysis/offlineData.dto';
 
 @Injectable()
 export class WrinklesService {
@@ -21,10 +20,6 @@ export class WrinklesService {
     analysis(data: AlgoAnalysisDTO, taskResponse: any, imageArgs: any) {
         const analyzedImageArgs = imageArgs.analyzedImageArgs;
 
-        const maskImageArgsYellow = imageArgs.maskImageArgsYellow;
-        const maskImageArgsOrange = imageArgs.maskImageArgsOrange;
-        const maskImageArgsGreen = imageArgs.maskImageArgsGreen;
-        const maskImageArgsBlack = imageArgs.maskImageArgsBlack;
         const originalImageArgs = imageArgs.originalImageArgs;
         taskResponse = {
             ver: taskResponse.ver,
@@ -57,22 +52,6 @@ export class WrinklesService {
             analyzedImage: {
                 id: analyzedImageArgs.hash,
                 url: analyzedImageArgs.url,
-            },
-            maskImageYellow: {
-                id: maskImageArgsYellow.hash,
-                url: maskImageArgsYellow.url,
-            },
-            maskImageOrange: {
-                id: maskImageArgsOrange.hash,
-                url: maskImageArgsOrange.url,
-            },
-            maskImageGreen: {
-                id: maskImageArgsGreen.hash,
-                url: maskImageArgsGreen.url,
-            },
-            maskImageBlack: {
-                id: maskImageArgsBlack.hash,
-                url: maskImageArgsBlack.url,
             },
         };
 
@@ -164,62 +143,6 @@ export class WrinklesService {
                     JSON.stringify(taskResponse),
                 ],
             },
-            {
-                variables: [
-                    data.batch_id,
-                    maskImageArgsYellow.url,
-                    maskImageArgsYellow.sys_url,
-                    maskImageArgsYellow.hash,
-                    4,
-                    11,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-            {
-                variables: [
-                    data.batch_id,
-                    maskImageArgsOrange.url,
-                    maskImageArgsOrange.sys_url,
-                    maskImageArgsOrange.hash,
-                    4,
-                    7,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-            {
-                variables: [
-                    data.batch_id,
-                    maskImageArgsGreen.url,
-                    maskImageArgsGreen.sys_url,
-                    maskImageArgsGreen.hash,
-                    4,
-                    13,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-            {
-                variables: [
-                    data.batch_id,
-                    maskImageArgsBlack.url,
-                    maskImageArgsBlack.sys_url,
-                    maskImageArgsBlack.hash,
-                    4,
-                    20,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
         ];
         for (let i = 0; i < queries.length; i++) {
             this.database.executeQuery(saveSql, queries[i].variables);
@@ -227,10 +150,6 @@ export class WrinklesService {
 
         await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
         await this.S3Image.uploadImage(originalImageSave, originalImageArgs.sys_url);
-        await this.S3Image.uploadImage(maskImageYellow, maskImageArgsYellow.sys_url);
-        await this.S3Image.uploadImage(maskImageOrange, maskImageArgsOrange.sys_url);
-        await this.S3Image.uploadImage(maskImageGreen, maskImageArgsGreen.sys_url);
-        await this.S3Image.uploadImage(maskImageBlack, maskImageArgsBlack.sys_url);
 
         return 'saved';
     }
@@ -246,68 +165,6 @@ export class WrinklesService {
             maskImageArgs: maskImageArgs,
             originalImageArgs: originalImageArgs,
         };
-    }
-
-    async offlineSaveData(data: OfflineDatasDTO, imageRecords: any, imageArgs: any) {
-        const analyzedImageArgs = imageArgs.analyzedImageArgs;
-        // const maskImageArgs = imageArgs.maskImageArgs;
-
-        const originalImageArgs = imageArgs.originalImageArgs;
-
-        const environment = {
-            deviceModel: data.deviceModel,
-            deviceOS: data.deviceOS,
-            nth_analysis: imageRecords,
-            lat: data.lat,
-            long: data.long,
-            temperature: data.temperature,
-            humidity: data.humidity,
-            uv_index: data.uv_index,
-            appVersion: data.appVersion,
-
-        };
-
-        await this.batchAnalysis.updateEnvironment(data.batchId, environment);
-        const saveSql =
-            'INSERT INTO measurements (batch_id, url, sys_url, hash, type_measurement_id, type_image_id, args, scores) values ($1, $2, $3, $4, $5, $6, $7, $8)';
-        // const saveArgsSql = 'INSERT INTO keratin (batch_id, args) data ($1, $2)';
-        const queries = [
-            {
-                variables: [
-                    data.batchId,
-                    analyzedImageArgs.url,
-                    analyzedImageArgs.sys_url,
-                    analyzedImageArgs.hash,
-                    4,
-                    18,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    null,
-                ],
-            },
-
-            {
-                variables: [
-                    data.batchId,
-                    originalImageArgs.url,
-                    originalImageArgs.sys_url,
-                    originalImageArgs.hash,
-                    4,
-                    21,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    JSON.stringify(data.args),
-                ],
-            },
-        ];
-
-        for (let i = 0; i < queries.length; i++) {
-            this.database.executeQuery(saveSql, queries[i].variables);
-        }
-
-        return 'saved';
     }
 
     async offlinesaveDataImage(originalImage: any, analyzedImage: any, imageArgs: any) {

@@ -7,11 +7,19 @@ import { CONNECTION_POOL } from './database.module-definition';
 export class DatabaseService {
     private readonly logger = new MyLogger(DatabaseService.name);
 
-    constructor(@Inject('DATABASE_POOL') private pool: Pool) {}
+    constructor(@Inject('DATABASE_POOL') private pool: any) {}
 
     executeQuery(queryText: string, values: any[] = []): Promise<any> {
         this.logger.debug(`Executing query: ${queryText} (${values})`);
-        return this.pool.query(queryText, values).then((result: QueryResult) => {
+        return this.pool.primaryPool.query(queryText, values).then((result: QueryResult) => {
+            this.logger.debug(`Executed query, result size ${result.rows.length}`);
+            return result.rows;
+        });
+    }
+
+    crmQuery(queryText: string, values: any[] = []): Promise<any> {
+        this.logger.debug(`Executing query: ${queryText} (${values})`);
+        return this.pool.secondPool.query(queryText, values).then((result: QueryResult) => {
             this.logger.debug(`Executed query, result size ${result.rows.length}`);
             return result.rows;
         });
@@ -21,3 +29,4 @@ export class DatabaseService {
         return this.pool.query(query, params);
     }
 }
+
