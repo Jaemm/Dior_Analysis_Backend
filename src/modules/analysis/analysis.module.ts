@@ -68,11 +68,11 @@ import { QuestionsController } from './questions/questions.controller';
 })
 export class AnalysisModule {
     // Auth Middleware
-    // configure(consumer: MiddlewareConsumer) {
-    //     consumer
-    //         .apply(AuthMiddleware)
-    //         // .exclude({ path: 'analysis', method: RequestMethod.POST })
-    //         .forRoutes('analysis');
-    // }
+    configure(consumer: MiddlewareConsumer) {
+        consumer
+            .apply(AuthMiddleware)
+            // .exclude({ path: 'analysis', method: RequestMethod.POST })
+            .forRoutes('analysis');
+    }
 }
 

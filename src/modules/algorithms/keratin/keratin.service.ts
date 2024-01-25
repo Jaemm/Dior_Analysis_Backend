@@ -8,6 +8,7 @@ import fs from 'fs';
 import { FileUploadService } from '../../../common/FileUpload/fileUpload.service';
 import { BatchAnalysisService } from 'src/modules/analysis/batchAnalysis/batchAnalysis.service';
 
+@Injectable()
 export class KeratinService {
     constructor(
         private database: DatabaseService,
@@ -64,7 +65,7 @@ export class KeratinService {
     ) {
         const analyzedImage = Buffer.from(taskResponse.img, 'base64');
         const maskImage = Buffer.from(taskResponse.mask, 'base64');
-        const originalImageSave = Buffer.from(originalImage, 'base64');
+        const originalImageSave = originalImage;
 
         const analyzedImageArgs = imageArgs.analyzedImageArgs;
         const maskImageArgs = imageArgs.maskImageArgs;
@@ -74,10 +75,15 @@ export class KeratinService {
         delete taskResponse.img;
         delete taskResponse.mask;
         delete taskResponse.err;
+        taskResponse.computation_score = coputaionResutl.computation_score;
+        taskResponse.questionnaire_score = coputaionResutl.questionnaire_score;
 
         taskResponse = {
             ...taskResponse,
         };
+
+        taskResponse.computation_score = coputaionResutl.computation_score;
+        taskResponse.questionnaire_score = coputaionResutl.questionnaire_score;
 
         const environment = {
             deviceModel: data.deviceModel,
@@ -91,13 +97,9 @@ export class KeratinService {
             positionNumber: data.positionNumber,
         };
 
-        taskResponse.computation_score = coputaionResutl.computation_score;
-        taskResponse.questionnaire_score = coputaionResutl.questionnaire_score;
-
-        await this.batchAnalysis.updateEnvironment(data.batch_id, environment);
         const saveSql =
             'INSERT INTO measurements (batch_id, url, sys_url, hash, type_measurement_id, type_image_id, args, scores) values ($1, $2, $3, $4, $5, $6, $7, $8)';
-        // const saveArgsSql = 'INSERT INTO keratin (batch_id, args) data ($1, $2)';
+        // const saveArgsSql = 'INSERT INTO shine (batch_id, args) data ($1, $2)';
         const queries = [
             {
                 variables: [
@@ -113,22 +115,22 @@ export class KeratinService {
                     null,
                 ],
             },
-            // {
-            //     // maskImgae
+            {
+                // maskImgae
 
-            //     variables: [
-            //         data.batch_id,
-            //         maskImageArgs.url,
-            //         maskImageArgs.sys_url,
-            //         maskImageArgs.hash,
-            //         10,
-            //         15,
-            //         JSON.stringify({
-            //             nth_analysis: imageRecords,
-            //         }),
-            //         null,
-            //     ],
-            // },
+                variables: [
+                    data.batch_id,
+                    maskImageArgs.url,
+                    maskImageArgs.sys_url,
+                    maskImageArgs.hash,
+                    10,
+                    15,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    null,
+                ],
+            },
             {
                 variables: [
                     data.batch_id,
@@ -148,11 +150,11 @@ export class KeratinService {
         for (let i = 0; i < queries.length; i++) {
             this.database.executeQuery(saveSql, queries[i].variables);
         }
+        await this.batchAnalysis.updateEnvironment(data.batch_id, environment);
 
         await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
-        // await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
+        await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);
         await this.S3Image.uploadImage(originalImageSave, originalImageArgs.sys_url);
-
         return 'saved';
     }
 

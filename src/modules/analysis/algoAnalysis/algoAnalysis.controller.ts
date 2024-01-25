@@ -120,12 +120,12 @@ export class AlgoAnalysisController {
         if (data.task.taskName === 'CNDP_SkinTone') {
             result = task.applyAsync([
                 originalImage,
-                '/home/ubuntu/backendtestuser/repositories/cfa-python/CNDP/files/chart.png',
+                process.env.skinToneFile,
             ]);
         } else if (data.task.taskName === 'CNDP_FitzSG') {
             result = task.applyAsync([
                 originalImage,
-                '/home/ubuntu/backendtestuser/repositories/cfa-python/CNDP/files/chart.png',
+                process.env.skinToneFile,
             ]);
         } else {
             result = task.applyAsync([originalImage]);

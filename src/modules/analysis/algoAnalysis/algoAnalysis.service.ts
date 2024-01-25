@@ -172,9 +172,15 @@ export class AlgoAnalysisService {
     ) {
         switch (data.type) {
             case 'keratin':
-                this.keratin.saveData(coputaionResutl, data, taskResponse, imageRecords, originalImage, imageArgs);
-
-                return;
+                console.log('testing', coputaionResutl, imageRecords, originalImage, imageArgs);
+                return this.keratin.saveData(
+                    coputaionResutl,
+                    data,
+                    taskResponse,
+                    imageRecords,
+                    originalImage,
+                    imageArgs,
+                );
             case 'pores':
                 return this.pores.saveData(coputaionResutl, data, taskResponse, imageRecords, originalImage, imageArgs);
             case 'porphyrin':

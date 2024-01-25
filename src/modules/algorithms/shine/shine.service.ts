@@ -123,7 +123,7 @@ export class ShineService {
                     maskImageArgs.url,
                     maskImageArgs.sys_url,
                     maskImageArgs.hash,
-                    10,
+                    9,
                     15,
                     JSON.stringify({
                         nth_analysis: imageRecords,
