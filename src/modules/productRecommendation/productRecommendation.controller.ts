@@ -65,20 +65,28 @@ export class ProductRecommendationController {
                 skincareProducts,
             };
 
-            const sendEmail = await this.email.sendEmailTemplate(
+            return this.email.sendEmailTemplate(
                 body.email,
                 'product recommendation',
                 emailFile,
                 dynamicData,
+            ).then(() =>
+                res.status(200).json({
+                    status: 200,
+                    service: 'Product Recommendation Email',
+                    message: 'Success',
+                }) 
             );
 
-            console.log(sendEmail);
+            
 
-            return res.status(200).json({
-                status: 200,
-                service: 'getBatchId',
-                message: 'Success',
-            });
+            // console.log(sendEmail);
+
+            // res.status(200).json({
+            //     status: 200,
+            //     service: 'Product Recommendation Email',
+            //     message: 'Success',
+            // });
         } catch (e) {
             throw new Error(e);
         }

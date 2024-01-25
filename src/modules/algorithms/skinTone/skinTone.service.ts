@@ -48,7 +48,7 @@ export class SkintoneService {
 
     async saveData(
         coputaionResutl: any,
-        data: AlgoAnalysisDTO,
+        data: any,
         taskResponse: any,
         imageRecords: any,
         originalImage: any,
@@ -81,6 +81,10 @@ export class SkintoneService {
             humidity: data.humidity,
             uv_index: data.uv_index,
             positionNumber: data.positionNumber,
+            consultant_id: data.consultant_id,
+            email: data.email,
+            app_id: data.app_id,
+            name: data.name,
         };
 
         const saveSql =

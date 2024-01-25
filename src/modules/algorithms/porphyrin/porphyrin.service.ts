@@ -40,6 +40,7 @@ export class PorphyrinService {
             nth_analysis: '',
             lat: data.lat,
             long: data.long,
+            
         };
 
         const retObj: any = {
@@ -76,7 +77,7 @@ export class PorphyrinService {
 
     async saveData(
         coputaionResutl: any,
-        data: AlgoAnalysisDTO,
+        data: any,
         taskResponse: any,
         imageRecords: any,
         originalImage: any,
@@ -127,6 +128,10 @@ export class PorphyrinService {
             humidity: data.humidity,
             uv_index: data.uv_index,
             positionNumber: data.positionNumber,
+            consultant_id: data.consultant_id,
+            email: data.email,
+            app_id: data.app_id,
+            name: data.name,
         };
 
         taskResponse.computation_score = coputaionResutl.computation_score;

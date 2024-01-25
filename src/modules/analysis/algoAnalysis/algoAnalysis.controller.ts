@@ -50,7 +50,7 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 
-import * as jwt from 'jsonwebtoken';
+// import * as jwt from 'jsonwebtoken';
 import * as fs from 'fs';
 
 @ApiTags('Analysis')
@@ -80,7 +80,7 @@ export class AlgoAnalysisController {
     @Post('')
     @HttpCode(200)
     @UseInterceptors(FileInterceptor('image'))
-    async getcustomerHistory(@Body() data: any, @UploadedFile() image: Express.Multer.File, @Res() res: Response) {
+    async getcustomerHistory(@Body() data: any, @UploadedFile() image: Express.Multer.File, @Res() res: Response, @Req() req: Request) {
         if (!image)
             return res.send({
                 status: 40002,
@@ -120,19 +120,18 @@ export class AlgoAnalysisController {
         if (data.task.taskName === 'CNDP_SkinTone') {
             result = task.applyAsync([
                 originalImage,
-                '/home/ubuntu/backendtestuser/repositories/cfa-python/CNDP/files/chart.png',
+                process.env.skinToneFile,
             ]);
         } else if (data.task.taskName === 'CNDP_FitzSG') {
             result = task.applyAsync([
                 originalImage,
-                '/home/ubuntu/backendtestuser/repositories/cfa-python/CNDP/files/chart.png',
+                process.env.skinToneFile,
             ]);
         } else {
             result = task.applyAsync([originalImage]);
         }
 
         const taskResponse = await result?.get();
-        console.log(data.type)
 
         if (taskResponse.err) {
             return res.send({
@@ -160,9 +159,14 @@ export class AlgoAnalysisController {
             );
         });
         const coputaionResutl: any = {};
+        const token = req.headers.authorization?.split(' ')[1];
 
-        // coputaionResutl.computation_score = computation['computation_score'];
-        // coputaionResutl.questionnaire_score = computation['questionnaire_score'];
+        const args = this.AlgoAnalysis.decodeToken(token)
+        data.consultant_id = args.consultant_id
+        data.email = args.email
+        data.app_id = args.app_id
+        data.name = args.name
+        
         const saving = await this.AlgoAnalysis.finalSave(
             coputaionResutl,
             data,
@@ -180,6 +184,7 @@ export class AlgoAnalysisController {
                 return promise2;
             })
             .catch((error) => {
+                console.log(error)
                 return res.send({
                     status: 500,
                     type: 'InternalServerError',
@@ -438,15 +443,16 @@ export class AlgoAnalysisController {
                             score: body.score,
                             raw: body.raw,
                         },
+                        originalImage: {
+                            id: originalImageArgs.hash,
+                            url: originalImageArgs.url,
+                        },
+                        analyzedImage: {
+                            id: analyzedImageArgs.hash,
+                            url: analyzedImageArgs.url,
+                        },
                     },
-                    originalImage: {
-                        id: originalImageArgs.hash,
-                        url: originalImageArgs.url,
-                    },
-                    analyzedImage: {
-                        id: analyzedImageArgs.hash,
-                        url: analyzedImageArgs.url,
-                    },
+         
                 }),
             );
         });
@@ -513,14 +519,14 @@ export class AlgoAnalysisController {
                             score: body.score,
                             raw: body.raw,
                         },
-                    },
-                    originalImage: {
-                        id: originalImageArgs.hash,
-                        url: originalImageArgs.url,
-                    },
-                    analyzedImage: {
-                        id: analyzedImageArgs.hash,
-                        url: analyzedImageArgs.url,
+                        originalImage: {
+                            id: originalImageArgs.hash,
+                            url: originalImageArgs.url,
+                        },
+                        analyzedImage: {
+                            id: analyzedImageArgs.hash,
+                            url: analyzedImageArgs.url,
+                        },
                     },
                 }),
             );
@@ -662,23 +668,8 @@ export class AlgoAnalysisController {
             }
 
             const token = req.headers.authorization?.split(' ')[1];
-            if (!token) {
-                return res.status(403).send({
-                    status: 10002,
-                    type: 'AuthenticationError',
-                    message: {
-                        en: 'You are unauthorized, try refreshing the page.',
-                    },
-                });
-            }
-            // getting consultant information from Token
-            const decoded: any = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-            const args = {
-                consultant_id: decoded['consultant_id'],
-                email: decoded['email'],
-                app_id: decoded['app_id'],
-            };
+            const args = this.AlgoAnalysis.decodeToken(token)
 
             const insert = await this.batchAnalysis.insertInAnalysis(customer_id, JSON.stringify(args));
 
@@ -745,6 +736,7 @@ export class AlgoAnalysisController {
         @Body() data: any,
         @UploadedFiles() files: { analyzedImage: Express.Multer.File[]; originalImage: Express.Multer.File[] },
         @Res() res: Response,
+        @Req() req: Request
     ) {
         try {
             if (!files?.analyzedImage || !files?.originalImage) {
@@ -767,15 +759,6 @@ export class AlgoAnalysisController {
 
             let algoId = Number(data.algorithmId); //this.AlgoAnalysis.getCBBTaskByAlgoType(Number(data.type));
 
-            // if (/[0-9]/.test(data.algorithmId)) {
-            //     algo = this.AlgoAnalysis.getCBBTaskByAlgoType(Number(data.algorithmId));
-            //     algoId = algo.id;
-            // } else {
-            //     data.task = this.AlgoAnalysis.getTaskByAlgoType(data.algorithmId);
-            //     algoId = await this.AlgoAnalysis.getAlgoID(toLower(data.algorithmId));
-            // }
-
-            // const algo = this.AlgoAnalysis.getCBBTaskByAlgoType(data.type);
 
             const analyzed: any[] = [];
             const original: any[] = [];
@@ -910,6 +893,13 @@ export class AlgoAnalysisController {
                 service: 'Offline Analysis Data saving',
                 message: 'Data saved to the cloud',
             });
+            const token = req.headers.authorization?.split(' ')[1];
+
+            const args = this.AlgoAnalysis.decodeToken(token)
+            data.consultant_id = args.consultant_id
+            data.email = args.email
+            data.app_id = args.app_id
+            data.name = args.name
             await this.AlgoAnalysis.updateData(data, imageRecords);
         } catch (error) {
             console.error(error);
@@ -984,6 +974,7 @@ export class AlgoAnalysisController {
         @Body() data: any,
         @UploadedFiles() files: { image1: Express.Multer.File[]; image2: Express.Multer.File[] },
         @Res() res: Response,
+        @Req() req: Request
     ) {
         console.log('body', data);
         try {
@@ -1131,6 +1122,14 @@ export class AlgoAnalysisController {
                 service: 'Offline Analysis Data saving',
                 message: 'Data saved to the cloud',
             });
+            const token = req.headers.authorization?.split(' ')[1];
+
+            const args = this.AlgoAnalysis.decodeToken(token)
+            data.consultant_id = args.consultant_id
+            data.email = args.email
+            data.app_id = args.app_id
+            data.name = args.name
+
             await this.AlgoAnalysis.updateData(data, imageRecords);
         } catch (error) {
             console.error(error);

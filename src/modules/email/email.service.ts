@@ -41,7 +41,7 @@ export class EmailService {
             const html = compiledTemplate(context);
 
             const mailOptions = {
-                from: 'notice@chowis.com',
+                from: process.env.EMAIL_USER,
                 to: recipientEmail,
                 subject,
                 html,
