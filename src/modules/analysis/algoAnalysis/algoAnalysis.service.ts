@@ -1,4 +1,11 @@
-import { Injectable, Inject, HttpException, ConsoleLogger, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+    Injectable,
+    Inject,
+    HttpException,
+    ConsoleLogger,
+    BadRequestException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { AlgoAnalysisDTO } from 'src/common/Dto/analysis/algoAnalysis.dto';
 import { FileUploadService } from '../../../common/FileUpload/fileUpload.service';
@@ -169,7 +176,14 @@ export class AlgoAnalysisService {
     ) {
         switch (data.type) {
             case 'keratin':
-                return this.keratin.saveData(coputaionResutl, data, taskResponse, imageRecords, originalImage, imageArgs);
+                return this.keratin.saveData(
+                    coputaionResutl,
+                    data,
+                    taskResponse,
+                    imageRecords,
+                    originalImage,
+                    imageArgs,
+                );
             case 'pores':
                 return this.pores.saveData(coputaionResutl, data, taskResponse, imageRecords, originalImage, imageArgs);
             case 'porphyrin':
@@ -1464,7 +1478,7 @@ export class AlgoAnalysisService {
             appVersion: data.appVersion,
             consultant_id: data.consultant_id,
             email: data.email,
-            app_id: data.app_id
+            app_id: data.app_id,
         };
         await this.updateEnvironment(data.batch_id, environment);
     }
@@ -1737,10 +1751,9 @@ export class AlgoAnalysisService {
         return result;
     }
 
-    decodeToken(token: any){
+    decodeToken(token: any) {
         if (!token) {
-            throw new UnauthorizedException (10002 ,'You are unauthorized, try refreshing the page.')
-
+            throw new UnauthorizedException(10002, 'You are unauthorized, try refreshing the page.');
         }
         // getting consultant information from Token
         const decoded: any = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -1749,10 +1762,10 @@ export class AlgoAnalysisService {
             consultant_id: decoded['consultant_id'],
             email: decoded['email'],
             app_id: decoded['app_id'],
-            name: decoded['name']
+            name: decoded['name'],
         };
 
-        return args
+        return args;
     }
 }
 

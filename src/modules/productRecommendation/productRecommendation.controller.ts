@@ -1,4 +1,15 @@
-import { Controller, Body, Get, Post, UseInterceptors, UploadedFiles, Res, Param, Query } from '@nestjs/common';
+import {
+    Controller,
+    Body,
+    Get,
+    Post,
+    UseInterceptors,
+    UploadedFiles,
+    Res,
+    Param,
+    Query,
+    Headers,
+} from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ProductRecommendationService } from './productRecommendation.service';
 import { ApiBody, ApiConsumes, ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -13,11 +24,15 @@ export class ProductRecommendationController {
 
     // @ApiExcludeEndpoint()
     @Post('')
-    async getProductByEmail(@Body() body: ProductRecommendationEmailDto, @Res() res: Response) {
+    async getProductByEmail(
+        @Body() body: ProductRecommendationEmailDto,
+        @Headers('x-chowis-locale') chowisLocale: string,
+        @Res() res: Response,
+    ) {
         try {
-            const productOrder = await this.recommendation.scoresSorting(body.batchId);
+            const productOrder = await this.recommendation.scoresSorting(body.batchId, chowisLocale);
 
-            const productRec = await this.recommendation.getRecommendedProduct(body.batchId);
+            const productRec = await this.recommendation.getRecommendedProduct(body.batchId, chowisLocale);
 
             if (productOrder.length === 0 || productRec.length === 0) {
                 return res.status(400).json({
@@ -65,28 +80,15 @@ export class ProductRecommendationController {
                 skincareProducts,
             };
 
-            return this.email.sendEmailTemplate(
-                body.email,
-                'product recommendation',
-                emailFile,
-                dynamicData,
-            ).then(() =>
-                res.status(200).json({
-                    status: 200,
-                    service: 'Product Recommendation Email',
-                    message: 'Success',
-                }) 
-            );
-
-            
-
-            // console.log(sendEmail);
-
-            // res.status(200).json({
-            //     status: 200,
-            //     service: 'Product Recommendation Email',
-            //     message: 'Success',
-            // });
+            return this.email
+                .sendEmailTemplate(body.email, 'Your Dior Skin Analyzer Consultation Result', emailFile, dynamicData)
+                .then(() =>
+                    res.status(200).json({
+                        status: 200,
+                        service: 'Product Recommendation Email',
+                        message: 'Success',
+                    }),
+                );
         } catch (e) {
             throw new Error(e);
         }
