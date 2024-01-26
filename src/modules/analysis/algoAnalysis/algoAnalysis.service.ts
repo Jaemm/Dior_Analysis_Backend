@@ -1,13 +1,16 @@
-import { Injectable, Inject, HttpException, ConsoleLogger, BadRequestException } from '@nestjs/common';
-import { GetcustomerHistoryDTO } from 'src/common/Dto/customer/analysisHistory/analysisHistory.dto';
+import {
+    Injectable,
+    Inject,
+    HttpException,
+    ConsoleLogger,
+    BadRequestException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
-import * as celery from 'celery-node';
 import { AlgoAnalysisDTO } from 'src/common/Dto/analysis/algoAnalysis.dto';
-import fs from 'fs';
 import { FileUploadService } from '../../../common/FileUpload/fileUpload.service';
 import { KeratinService } from 'src/modules/algorithms/keratin/keratin.service';
 import { PoresService } from 'src/modules/algorithms/pores/pores.service';
-import { LogError } from 'typeorm-model-generator/dist/src/Utils';
 import { PorphyrinService } from 'src/modules/algorithms/porphyrin/porphyrin.service';
 import { SebumService } from 'src/modules/algorithms/sebum/sebum.service';
 import { SebumTService } from 'src/modules/algorithms/sebumT/sebumT.service';
@@ -22,6 +25,7 @@ import { SensitivtyScalingService } from 'src/modules/algorithms/sensitivtyScali
 import { FitzSGService } from 'src/modules/algorithms/fitzSG/fitzSG.service';
 import * as moment from 'moment';
 import { OfflineDataCBBDTO } from 'src/common/Dto/analysis/offlineData.dto';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AlgoAnalysisService {
@@ -172,7 +176,6 @@ export class AlgoAnalysisService {
     ) {
         switch (data.type) {
             case 'keratin':
-                console.log('testing', coputaionResutl, imageRecords, originalImage, imageArgs);
                 return this.keratin.saveData(
                     coputaionResutl,
                     data,
@@ -1473,6 +1476,9 @@ export class AlgoAnalysisService {
             humidity: data.humidity,
             uv_index: data.uv_index,
             appVersion: data.appVersion,
+            consultant_id: data.consultant_id,
+            email: data.email,
+            app_id: data.app_id,
         };
         await this.updateEnvironment(data.batch_id, environment);
     }
@@ -1743,6 +1749,23 @@ export class AlgoAnalysisService {
         console.log(result);
 
         return result;
+    }
+
+    decodeToken(token: any) {
+        if (!token) {
+            throw new UnauthorizedException(10002, 'You are unauthorized, try refreshing the page.');
+        }
+        // getting consultant information from Token
+        const decoded: any = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+        const args = {
+            consultant_id: decoded['consultant_id'],
+            email: decoded['email'],
+            app_id: decoded['app_id'],
+            name: decoded['name'],
+        };
+
+        return args;
     }
 }
 

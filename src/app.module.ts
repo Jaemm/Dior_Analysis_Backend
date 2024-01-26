@@ -56,6 +56,7 @@ export class AppModule {
             .exclude(
                 { path: 'web-result/(.*)', method: RequestMethod.ALL },
                 { path: 'image/(.*)', method: RequestMethod.GET },
+                { path: 'questions/(.*)', method: RequestMethod.ALL },
             )
             .forRoutes('*');
     }

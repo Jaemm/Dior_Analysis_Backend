@@ -86,5 +86,64 @@ export class WebResultService {
         );
         return result;
     }
+
+    async finaleWebResult(batch_id: any) {
+        const result = await this.webResult(batch_id);
+
+        const avg = await this.webResultAverage(batch_id);
+
+        // console.log(result);
+        let moistureT = null;
+        let moistureU = null;
+        let sebumT = null;
+        let sebumU = null;
+
+        for (let i = 0; i < result.length; i++) {
+            // console.log(result[i]['measurement'] === );
+            if (result[i]['measurement'] === 'moistureT' || result[i]['measurement'] === 'moistureU') {
+                result[i]['analyzed_image_url'] = null;
+                result[i]['original_image_url'] = null;
+            }
+
+            result[i].value = +result[i].value;
+            for (let j = 0; j < avg.length; j++) {
+                if (avg[j].measurement === 'moistureT') moistureT = avg[j].avg;
+                if (avg[j].measurement === 'moistureU') moistureU = avg[j].avg;
+                if (avg[j].measurement === 'sebumT') sebumT = avg[j].avg;
+                if (avg[j].measurement === 'sebumU') sebumU = avg[j].avg;
+
+                if (result[i]['measurement'] === avg[j].measurement) {
+                    result[i]['avg_value'] = parseFloat(avg[j].avg);
+                    // result[i]['computation_score'] = parseFloat(avg[i].computation_score);
+                    // result[i]['keyword_value'] = avg[j]['keyword_value'];
+                    // result[i]['keyword_id'] = parseFloat(avg[j].keyword_id);
+                }
+            }
+        }
+
+        let hydration = 0;
+        result.forEach((element: any) => {
+            const value = Math.floor(element.avg_value || element.value || 0);
+            if (element.measurement === 'moistureT' || element.measurement === 'moistureU') {
+                hydration += value;
+
+                delete element?.moistureT;
+                delete element?.moistureU;
+            }
+        });
+        const dehydration = 99 - Math.floor(hydration / 2);
+
+        result.push({
+            measurement: 'hydration',
+            value: dehydration,
+            date: null,
+            time: null,
+            original_image_url: null,
+            analyzed_image_url: null,
+            avg_value: dehydration,
+        });
+
+        return result;
+    }
 }
 

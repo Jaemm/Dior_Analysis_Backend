@@ -27,11 +27,12 @@ export class SkinToneDiorService {
             averageR: taskResponse.averageR,
             averageG: taskResponse.averageG,
             averageB: taskResponse.averageB,
-            deviceModel: data.deviceModel,
-            deviceOS: data.deviceOS,
-            nth_analysis: '',
             lat: data.lat,
             long: data.long,
+            temperature: data.temperature,
+            humidity: data.humidity,
+            uv_index: data.uv_index,
+            positionNumber: data.positionNumber,
         };
 
         const retObj: any = {
@@ -55,7 +56,7 @@ export class SkinToneDiorService {
     }
 
     async saveData(
-        data: AlgoAnalysisDTO,
+        data: any,
         imageRecords: any,
         taskResponse: any,
         originalImageFirst: any,
@@ -83,6 +84,10 @@ export class SkinToneDiorService {
             humidity: data.humidity,
             uv_index: data.uv_index,
             positionNumber: data.positionNumber,
+            consultant_id: data.consultant_id,
+            email: data.email,
+            app_id: data.app_id,
+            name: data.name,
         };
 
         await this.batchAnalysis.updateEnvironment(data.batch_id, environment);

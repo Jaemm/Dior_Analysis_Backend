@@ -150,7 +150,7 @@ export class KeratinService {
         for (let i = 0; i < queries.length; i++) {
             this.database.executeQuery(saveSql, queries[i].variables);
         }
-        await this.batchAnalysis.updateEnvironment(data.batch_id, environment);
+        // await this.batchAnalysis.updateEnvironment(data.batch_id, environment);
 
         await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
         await this.S3Image.uploadImage(maskImage, maskImageArgs.sys_url);

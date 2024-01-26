@@ -23,12 +23,12 @@ import { BullModule } from '@nestjs/bull';
 import { MoistureUService } from '../algorithms/moistureU/moistureU.service';
 import { MoistureTService } from '../algorithms/moistureT/moistureT.service';
 import { SebumUService } from '../algorithms/sebumU/sebumU.service';
-import { AuthMiddleware } from 'src/common/middleWare/authMiddlware/auth.middleware';
 import { WebResultController } from './webResult/webResult.controller';
 import { WebResultService } from './webResult/webResult.service';
 import { ComputationService } from '../algorithms/computation/computation.service';
 import { QuestionsService } from './questions/questions.service';
 import { QuestionsController } from './questions/questions.controller';
+import { AuthMiddleware } from 'src/common/middleWare/authMiddlware/auth.middleware';
 
 @Module({
     imports: [

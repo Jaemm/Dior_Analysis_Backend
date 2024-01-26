@@ -8,7 +8,11 @@ import { BatchAnalysisService } from 'src/modules/analysis/batchAnalysis/batchAn
 export class MoistureUService {
     constructor(private database: DatabaseService) {}
 
+
+
     saveData(data: AlgoAnalysisDTO) {
+
+        console.log("--->", data, JSON.stringify(data))
         const saveSql =
             'INSERT INTO measurements (batch_id, type_measurement_id, type_image_id, scores) values ($1, $2, $3, $4)';
         const queries = [data.batch_id, 12, 21, JSON.stringify(data)];

@@ -28,13 +28,13 @@ export class BatchAnalysisService {
             let data = JSON.stringify(environment);
 
             const update = `
-                    UPDATE analysis
-                    SET args = $1
-                    WHERE batch_id = $2
-                  `;
-
-            this.database.executeQuery(update, [data, batch_id]);
-            return update;
+                UPDATE analysis
+                SET args = $1
+                WHERE batch_id = $2
+            `;
+    
+            await this.database.executeQuery(update, [data, batch_id]);
+            return 'Update successful'; // Or any success message
         } catch (e) {
             console.log('check', e);
         }

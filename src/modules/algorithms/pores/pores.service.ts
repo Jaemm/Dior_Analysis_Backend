@@ -76,7 +76,7 @@ export class PoresService {
 
     async saveData(
         coputaionResutl: any,
-        data: AlgoAnalysisDTO,
+        data: any,
         taskResponse: any,
         imageRecords: any,
         originalImage: any,
@@ -130,6 +130,10 @@ export class PoresService {
             humidity: data.humidity,
             uv_index: data.uv_index,
             positionNumber: data.positionNumber,
+            consultant_id: data.consultant_id,
+            email: data.email,
+            app_id: data.app_id,
+            name: data.name,
         };
 
         const saveSql =
@@ -150,97 +154,97 @@ export class PoresService {
                     null,
                 ],
             },
-            // {
-            //     //analyzedImageSmall
-            //     variables: [
-            //         data.batch_id,
-            //         analyzedImageArgsS.url,
-            //         analyzedImageArgsS.sys_url,
-            //         analyzedImageArgsS.hash,
-            //         1,
-            //         25,
-            //         JSON.stringify({
-            //             nth_analysis: imageRecords,
-            //         }),
-            //         null,
-            //     ],
-            // },
-            // {
-            //     //analyzed_image_Medium
-            //     variables: [
-            //         data.batch_id,
-            //         analyzedImageArgsM.url,
-            //         analyzedImageArgsM.sys_url,
-            //         analyzedImageArgsM.hash,
-            //         1,
-            //         16,
-            //         JSON.stringify({
-            //             nth_analysis: imageRecords,
-            //         }),
-            //         null,
-            //     ],
-            // },
-            // {
-            //     //analyzed_image_big
-            //     variables: [
-            //         data.batch_id,
-            //         analyzedImageArgsB.url,
-            //         analyzedImageArgsB.sys_url,
-            //         analyzedImageArgsB.hash,
-            //         1,
-            //         24,
-            //         JSON.stringify({
-            //             nth_analysis: imageRecords,
-            //         }),
-            //         null,
-            //     ],
-            // },
+            {
+                //analyzedImageSmall
+                variables: [
+                    data.batch_id,
+                    analyzedImageArgsS.url,
+                    analyzedImageArgsS.sys_url,
+                    analyzedImageArgsS.hash,
+                    1,
+                    25,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    null,
+                ],
+            },
+            {
+                //analyzed_image_Medium
+                variables: [
+                    data.batch_id,
+                    analyzedImageArgsM.url,
+                    analyzedImageArgsM.sys_url,
+                    analyzedImageArgsM.hash,
+                    1,
+                    16,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    null,
+                ],
+            },
+            {
+                //analyzed_image_big
+                variables: [
+                    data.batch_id,
+                    analyzedImageArgsB.url,
+                    analyzedImageArgsB.sys_url,
+                    analyzedImageArgsB.hash,
+                    1,
+                    24,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    null,
+                ],
+            },
 
-            // {
-            //     // maskImageSmall
-            //     variables: [
-            //         data.batch_id,
-            //         maskImageSmall.url,
-            //         maskImageSmall.sys_url,
-            //         maskImageSmall.hash,
-            //         1,
-            //         4,
-            //         JSON.stringify({
-            //             nth_analysis: imageRecords,
-            //         }),
-            //         null,
-            //     ],
-            // },
-            // {
-            //     // maskImgaMedium
-            //     variables: [
-            //         data.batch_id,
-            //         maskImageArgsM.url,
-            //         maskImageArgsM.sys_url,
-            //         maskImageArgsM.hash,
-            //         1,
-            //         16,
-            //         JSON.stringify({
-            //             nth_analysis: imageRecords,
-            //         }),
-            //         null,
-            //     ],
-            // },
-            // {
-            //     // maskImageBig
-            //     variables: [
-            //         data.batch_id,
-            //         maskImageArgsB.url,
-            //         maskImageArgsB.sys_url,
-            //         maskImageArgsB.hash,
-            //         1,
-            //         26,
-            //         JSON.stringify({
-            //             nth_analysis: imageRecords,
-            //         }),
-            //         null,
-            //     ],
-            // },
+            {
+                // maskImageSmall
+                variables: [
+                    data.batch_id,
+                    maskImageSmall.url,
+                    maskImageSmall.sys_url,
+                    maskImageSmall.hash,
+                    1,
+                    4,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    null,
+                ],
+            },
+            {
+                // maskImgaMedium
+                variables: [
+                    data.batch_id,
+                    maskImageArgsM.url,
+                    maskImageArgsM.sys_url,
+                    maskImageArgsM.hash,
+                    1,
+                    16,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    null,
+                ],
+            },
+            {
+                // maskImageBig
+                variables: [
+                    data.batch_id,
+                    maskImageArgsB.url,
+                    maskImageArgsB.sys_url,
+                    maskImageArgsB.hash,
+                    1,
+                    26,
+                    JSON.stringify({
+                        nth_analysis: imageRecords,
+                    }),
+                    null,
+                ],
+            },
             {
                 //Original
                 variables: [
@@ -265,17 +269,17 @@ export class PoresService {
         await this.S3Image.uploadImage(analyzedImage, analyzedImageArgs.sys_url);
         await this.S3Image.uploadImage(originalImageSave, originalImageArgs.sys_url);
 
-        // await this.S3Image.uploadImage(analyzedImageS, analyzedImageArgsS.sys_url);
+        await this.S3Image.uploadImage(analyzedImageS, analyzedImageArgsS.sys_url);
 
-        // await this.S3Image.uploadImage(analyzedImageM, analyzedImageArgsM.sys_url);
+        await this.S3Image.uploadImage(analyzedImageM, analyzedImageArgsM.sys_url);
 
-        // await this.S3Image.uploadImage(analyzedImageB, analyzedImageArgsB.sys_url);
+        await this.S3Image.uploadImage(analyzedImageB, analyzedImageArgsB.sys_url);
 
-        // await this.S3Image.uploadImage(maskImageS, maskImageSmall.sys_url);
+        await this.S3Image.uploadImage(maskImageS, maskImageSmall.sys_url);
 
-        // await this.S3Image.uploadImage(maskImageM, maskImageArgsM.sys_url);
+        await this.S3Image.uploadImage(maskImageM, maskImageArgsM.sys_url);
 
-        // await this.S3Image.uploadImage(maskImageB, maskImageArgsB.sys_url);
+        await this.S3Image.uploadImage(maskImageB, maskImageArgsB.sys_url);
         await this.batchAnalysis.updateEnvironment(data.batch_id, environment);
 
         taskResponse = { ...taskResponse };
