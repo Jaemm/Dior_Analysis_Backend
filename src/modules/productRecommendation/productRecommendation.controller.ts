@@ -30,9 +30,13 @@ export class ProductRecommendationController {
         @Res() res: Response,
     ) {
         try {
-            const productOrder = await this.recommendation.scoresSorting(body.batchId, chowisLocale);
+            let language = chowisLocale ?? 'en';
 
-            const productRec = await this.recommendation.getRecommendedProduct(body.batchId, chowisLocale);
+            if (language.length > 4 || language.length < 1) language = 'en';
+
+            const productOrder = await this.recommendation.scoresSorting(body.batchId, language);
+
+            const productRec = await this.recommendation.getRecommendedProduct(body.batchId, language);
 
             if (productOrder.length === 0 || productRec.length === 0) {
                 return res.status(400).json({
@@ -41,6 +45,8 @@ export class ProductRecommendationController {
                     Meassage: 'Result not found, email not send',
                 });
             }
+
+            const header = this.recommendation.translation('results_skin_diagnosis_msg', language);
 
             const skincareProducts: any[] = [];
             const makeupProducts: any[] = [];
@@ -66,6 +72,7 @@ export class ProductRecommendationController {
             const weaknesScore5 = productOrder[4]['value'];
 
             const dynamicData = {
+                header,
                 weakness1,
                 weaknesScore1,
                 weakness2,
@@ -90,6 +97,7 @@ export class ProductRecommendationController {
                     }),
                 );
         } catch (e) {
+            console.log('===>', e);
             throw new Error(e);
         }
     }

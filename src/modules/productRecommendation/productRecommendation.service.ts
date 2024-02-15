@@ -24,7 +24,7 @@ export class ProductRecommendationService {
             console.log(this.translations[language]);
             return this.translations[language][key];
         } else {
-            return key;
+            return this.translations['en'];
         }
     }
 
