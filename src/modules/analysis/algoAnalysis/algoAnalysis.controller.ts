@@ -658,9 +658,11 @@ export class AlgoAnalysisController {
             let { customer_id, analysis_time } = param;
 
             const timeOfAnalysis =
-                analysis_time !== undefined ? analysis_time : this.AlgoAnalysis.formatDate(new Date());
-
-            console.log(String(new Date()));
+                analysis_time !== undefined && analysis_time.length !== 0
+                    ? analysis_time
+                    : analysis_time.length === 0
+                    ? this.AlgoAnalysis.formatDate(new Date())
+                    : this.AlgoAnalysis.formatDate(new Date());
 
             if (!customer_id) {
                 return res.status(400).send({
