@@ -6,12 +6,11 @@ import { DatabaseService } from 'src/database/database.service';
 export class BatchAnalysisService {
     constructor(private database: DatabaseService) {}
 
-    async insertInAnalysis(customer_id: any, args: any) {
-        console.log(args);
+    async insertInAnalysis(customer_id: any, analysis_time: any, args: any) {
         try {
             const insert = await this.database.executeQuery(`
-              INSERT INTO analysis (customer_id, args) 
-              values (${customer_id}, '${args}') RETURNING *
+              INSERT INTO analysis (customer_id, analysis_time, args) 
+              values (${customer_id}, to_timestamp('${analysis_time}', 'YYYY-MM-DD HH24:MI:SS'), '${args}') RETURNING *
             `);
 
             console.log(insert);
@@ -32,7 +31,7 @@ export class BatchAnalysisService {
                 SET args = $1
                 WHERE batch_id = $2
             `;
-    
+
             await this.database.executeQuery(update, [data, batch_id]);
             return 'Update successful'; // Or any success message
         } catch (e) {

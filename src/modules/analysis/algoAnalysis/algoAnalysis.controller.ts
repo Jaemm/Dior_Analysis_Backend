@@ -80,7 +80,12 @@ export class AlgoAnalysisController {
     @Post('')
     @HttpCode(200)
     @UseInterceptors(FileInterceptor('image'))
-    async getcustomerHistory(@Body() data: any, @UploadedFile() image: Express.Multer.File, @Res() res: Response, @Req() req: Request) {
+    async getcustomerHistory(
+        @Body() data: any,
+        @UploadedFile() image: Express.Multer.File,
+        @Res() res: Response,
+        @Req() req: Request,
+    ) {
         if (!image)
             return res.send({
                 status: 40002,
@@ -118,15 +123,9 @@ export class AlgoAnalysisController {
         let result: any;
 
         if (data.task.taskName === 'CNDP_SkinTone') {
-            result = task.applyAsync([
-                originalImage,
-                process.env.skinToneFile,
-            ]);
+            result = task.applyAsync([originalImage, process.env.skinToneFile]);
         } else if (data.task.taskName === 'CNDP_FitzSG') {
-            result = task.applyAsync([
-                originalImage,
-                process.env.skinToneFile,
-            ]);
+            result = task.applyAsync([originalImage, process.env.skinToneFile]);
         } else {
             result = task.applyAsync([originalImage]);
         }
@@ -161,12 +160,12 @@ export class AlgoAnalysisController {
         const coputaionResutl: any = {};
         const token = req.headers.authorization?.split(' ')[1];
 
-        const args = this.AlgoAnalysis.decodeToken(token)
-        data.consultant_id = args.consultant_id
-        data.email = args.email
-        data.app_id = args.app_id
-        data.name = args.name
-        
+        const args = this.AlgoAnalysis.decodeToken(token);
+        data.consultant_id = args.consultant_id;
+        data.email = args.email;
+        data.app_id = args.app_id;
+        data.name = args.name;
+
         const saving = await this.AlgoAnalysis.finalSave(
             coputaionResutl,
             data,
@@ -184,7 +183,7 @@ export class AlgoAnalysisController {
                 return promise2;
             })
             .catch((error) => {
-                console.log(error)
+                console.log(error);
                 return res.send({
                     status: 500,
                     type: 'InternalServerError',
@@ -452,7 +451,6 @@ export class AlgoAnalysisController {
                             url: analyzedImageArgs.url,
                         },
                     },
-         
                 }),
             );
         });
@@ -594,7 +592,7 @@ export class AlgoAnalysisController {
             let result = task.applyAsync([
                 originalImageFirst,
                 originalImageSecond,
-                "/home/ubuntu/repositories/cfa-python/CNDP/files/chart.png",
+                '/home/ubuntu/repositories/cfa-python/CNDP/files/chart.png',
             ]);
 
             const taskResponse = await result.get();
@@ -657,7 +655,12 @@ export class AlgoAnalysisController {
     @Get('/requestBatchId')
     async getBatchId(@Query() param: historyDTO, @Res() res: Response, @Req() req: Request) {
         try {
-            let { customer_id } = param;
+            let { customer_id, analysis_time } = param;
+
+            const timeOfAnalysis =
+                analysis_time !== undefined ? analysis_time : this.AlgoAnalysis.formatDate(new Date());
+
+            console.log(String(new Date()));
 
             if (!customer_id) {
                 return res.status(400).send({
@@ -669,9 +672,9 @@ export class AlgoAnalysisController {
 
             const token = req.headers.authorization?.split(' ')[1];
 
-            const args = this.AlgoAnalysis.decodeToken(token)
+            const args = this.AlgoAnalysis.decodeToken(token);
 
-            const insert = await this.batchAnalysis.insertInAnalysis(customer_id, JSON.stringify(args));
+            const insert = await this.batchAnalysis.insertInAnalysis(customer_id, timeOfAnalysis, JSON.stringify(args));
 
             return res.status(200).json({
                 status: 200,
@@ -736,7 +739,7 @@ export class AlgoAnalysisController {
         @Body() data: any,
         @UploadedFiles() files: { analyzedImage: Express.Multer.File[]; originalImage: Express.Multer.File[] },
         @Res() res: Response,
-        @Req() req: Request
+        @Req() req: Request,
     ) {
         try {
             if (!files?.analyzedImage || !files?.originalImage) {
@@ -758,7 +761,6 @@ export class AlgoAnalysisController {
             data.batch_id = Number(data.batchId);
 
             let algoId = Number(data.algorithmId); //this.AlgoAnalysis.getCBBTaskByAlgoType(Number(data.type));
-
 
             const analyzed: any[] = [];
             const original: any[] = [];
@@ -895,11 +897,11 @@ export class AlgoAnalysisController {
             });
             const token = req.headers.authorization?.split(' ')[1];
 
-            const args = this.AlgoAnalysis.decodeToken(token)
-            data.consultant_id = args.consultant_id
-            data.email = args.email
-            data.app_id = args.app_id
-            data.name = args.name
+            const args = this.AlgoAnalysis.decodeToken(token);
+            data.consultant_id = args.consultant_id;
+            data.email = args.email;
+            data.app_id = args.app_id;
+            data.name = args.name;
             await this.AlgoAnalysis.updateData(data, imageRecords);
         } catch (error) {
             console.error(error);
@@ -974,7 +976,7 @@ export class AlgoAnalysisController {
         @Body() data: any,
         @UploadedFiles() files: { image1: Express.Multer.File[]; image2: Express.Multer.File[] },
         @Res() res: Response,
-        @Req() req: Request
+        @Req() req: Request,
     ) {
         console.log('body', data);
         try {
@@ -1124,11 +1126,11 @@ export class AlgoAnalysisController {
             });
             const token = req.headers.authorization?.split(' ')[1];
 
-            const args = this.AlgoAnalysis.decodeToken(token)
-            data.consultant_id = args.consultant_id
-            data.email = args.email
-            data.app_id = args.app_id
-            data.name = args.name
+            const args = this.AlgoAnalysis.decodeToken(token);
+            data.consultant_id = args.consultant_id;
+            data.email = args.email;
+            data.app_id = args.app_id;
+            data.name = args.name;
 
             await this.AlgoAnalysis.updateData(data, imageRecords);
         } catch (error) {

@@ -101,6 +101,14 @@ export class historyDTO {
         example: '6',
     })
     customer_id: string | number;
+
+    @IsOptional()
+    @ApiPropertyOptional({
+        type: String,
+        description: 'This is Optional field',
+        example: '2024-02-13 00:00:00',
+    })
+    analysis_time: string;
 }
 
 export class paginationDTO {
