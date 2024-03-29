@@ -657,12 +657,12 @@ export class AlgoAnalysisController {
         try {
             let { customer_id, analysis_time } = param;
 
-            const timeOfAnalysis =
-                analysis_time !== undefined && analysis_time.length !== 0
-                    ? analysis_time
-                    : analysis_time.length === 0
-                    ? this.AlgoAnalysis.formatDate(new Date())
-                    : this.AlgoAnalysis.formatDate(new Date());
+            let timeOfAnalysis;
+            if (analysis_time) {
+                timeOfAnalysis = analysis_time;
+            } else {
+                timeOfAnalysis = this.AlgoAnalysis.formatDate(new Date());
+            }
 
             if (!customer_id) {
                 return res.status(400).send({
@@ -684,6 +684,7 @@ export class AlgoAnalysisController {
                 body: { batch_id: insert },
             });
         } catch (e) {
+            console.log(e);
             throw new Error(e);
         }
     }
