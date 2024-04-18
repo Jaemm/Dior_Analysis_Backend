@@ -10,15 +10,6 @@ jobs:
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v3
-            # - name: Install dependencies
-            #   run: npm install
-            # - name: Run end-to-end tests
-            #   run: |
-            #       npm run test:e2e
-            #       if [ $? -ne 0 ]; then
-            #         echo "End-to-end tests failed. Exiting."
-            #         exit 1
-            #       fi
 
     deploy:
         needs: e2e_test
