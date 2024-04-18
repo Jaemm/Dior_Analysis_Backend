@@ -31,11 +31,9 @@ export class ProductRecommendationController {
     ) {
         try {
             let language = chowisLocale ?? 'en';
-
             if (language.length > 4 || language.length < 1) language = 'en';
 
             const productOrder = await this.recommendation.scoresSorting(body.batchId, language);
-
             const productRec = await this.recommendation.getRecommendedProduct(body.batchId, language);
 
             if (productOrder.length === 0 || productRec.length === 0) {
@@ -47,19 +45,17 @@ export class ProductRecommendationController {
             }
 
             const header = this.recommendation.translation('results_skin_diagnosis_msg', language);
-
-            const skincareProducts: any[] = [];
-            const makeupProducts: any[] = [];
+            const skincareProducts_: any[] = [];
+            const makeupProducts_: any[] = [];
 
             for (let i = 0; i < productRec.length; i++) {
                 if (productRec[i]['routine'] === 'Makeup') {
-                    makeupProducts.push(productRec[i]);
+                    makeupProducts_.push(productRec[i]);
                 }
-                skincareProducts.push(productRec[i]);
+                skincareProducts_.push(productRec[i]);
             }
 
-            const emailFile = 'product_recommendation';
-
+            const emailFile = 'product_recommendation_updated';
             const weakness1 = productOrder[0]['measurement'];
             const weaknesScore1 = productOrder[0]['value'];
             const weakness2 = productOrder[1]['measurement'];
@@ -70,6 +66,33 @@ export class ProductRecommendationController {
             const weaknesScore4 = productOrder[3]['value'];
             const weakness5 = productOrder[4]['measurement'];
             const weaknesScore5 = productOrder[4]['value'];
+
+            const groupSize = 2;
+            const skincareProducts = [];
+            const makeupProducts = [];
+
+            for (let i = 0; i < skincareProducts_.length; i += groupSize) {
+                const group = skincareProducts_.slice(i, i + groupSize);
+                const formattedGroup: any = {};
+
+                for (let j = 0; j < group.length; j++) {
+                    formattedGroup[`product${j + 1}`] = group[j];
+                }
+
+                skincareProducts.push(formattedGroup);
+            }
+
+            // In case of makup
+            for (let i = 0; i < makeupProducts_.length; i += groupSize) {
+                const group = makeupProducts_.slice(i, i + groupSize);
+                const formattedGroup: any = {};
+
+                for (let j = 0; j < group.length; j++) {
+                    formattedGroup[`product${j + 1}`] = group[j];
+                }
+
+                makeupProducts.push(formattedGroup);
+            }
 
             const dynamicData = {
                 header,
@@ -97,7 +120,6 @@ export class ProductRecommendationController {
                     }),
                 );
         } catch (e) {
-            console.log('===>', e);
             throw new Error(e);
         }
     }
@@ -117,4 +139,3 @@ export class ProductRecommendationController {
         }
     }
 }
-

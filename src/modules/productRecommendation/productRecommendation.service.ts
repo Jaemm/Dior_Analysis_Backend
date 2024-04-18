@@ -21,7 +21,7 @@ export class ProductRecommendationService {
         this.translations = JSON.parse(fileContent);
 
         if (this.translations[language] && this.translations[language][key]) {
-            console.log(this.translations[language]);
+            // console.log(this.translations[language]);
             return this.translations[language][key];
         } else {
             return this.translations['en'];
@@ -76,7 +76,7 @@ export class ProductRecommendationService {
                 WHERE
                     prc.batch_id = $1
                     AND prc.created_at > '2024-01-01';`;
-            console.log('newCode.toUpperCase()', newCode.toUpperCase());
+
             const queries = [batchId, newCode.toUpperCase()];
             result = await this.database.crmQuery(saveSql, queries);
 
@@ -116,4 +116,3 @@ export class ProductRecommendationService {
         return top5mesurement;
     }
 }
-

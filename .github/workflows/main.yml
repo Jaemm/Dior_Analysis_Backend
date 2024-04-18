@@ -1,0 +1,48 @@
+# PRODUTION RELEASE SCRIPT
+name: Production Release
+on:
+    push:
+        branches: [master]
+jobs:
+    # Europe server
+    europe-build:
+        runs-on: [ubuntu-latest]
+
+        if: (github.ref == 'refs/heads/master')
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+
+            - name: Set up SSH
+              uses: webfactory/ssh-agent@v0.5.3
+              with:
+                  ssh-private-key: ${{ secrets.GLOBAL_KEY }}
+
+            - name: SSH into server and run sync.sh
+              run: |
+                  ssh -o StrictHostKeyChecking=no -T -i <(echo "${{ secrets.GLOBAL_KEY }}") ubuntu@13.36.54.183 << EOF
+                    cd /home/ubuntu/repositories/BE-CNDP-HAIR-v2/
+                    git pull origin master
+                    sudo bash -s < /home/ubuntu/repositories/BE-CNDP-HAIR-v2/sync.sh
+                  EOF
+
+    # Removing Old action
+    cleanup-action:
+        runs-on: [ubuntu-latest]
+        needs: europe-build
+        continue-on-error: true
+        steps:
+            - name: Cleaning existing Actions
+              run: |
+                  echo "Removing old workflow runs..."
+                  RUNS=$(curl -s -X GET -G "https://api.github.com/repos/${{ github.repository }}/actions/runs" \
+                          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                          -H "Accept: application/vnd.github.v3+json" \
+                          | jq -r '.workflow_runs[] | select(.id != ${{ github.run_id }}) | .id')
+
+                  for run in $RUNS; do
+                    echo "Deleting workflow run $run"
+                    curl -X DELETE -G "https://api.github.com/repos/${{ github.repository }}/actions/runs/$run" \
+                      -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                      -H "Accept: application/vnd.github.v3+json"
+                  done
