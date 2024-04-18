@@ -2,13 +2,13 @@
 name: Production Release
 on:
     push:
-        branches: [master]
+        branches: [main]
 jobs:
     # Europe server
     europe-build:
         runs-on: [ubuntu-latest]
 
-        if: (github.ref == 'refs/heads/master')
+        if: (github.ref == 'refs/heads/main')
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v3
@@ -21,9 +21,9 @@ jobs:
             - name: SSH into server and run sync.sh
               run: |
                   ssh -o StrictHostKeyChecking=no -T -i <(echo "${{ secrets.GLOBAL_KEY }}") ubuntu@13.36.54.183 << EOF
-                    cd /home/ubuntu/repositories/BE-CNDP-HAIR-v2/
-                    git pull origin master
-                    sudo bash -s < /home/ubuntu/repositories/BE-CNDP-HAIR-v2/sync.sh
+                    cd /home/ubuntu/repositories/BE_dior-analysis-v2/
+                    git pull origin main
+                    sudo bash -s < /home/ubuntu/repositories/BE_dior-analysis-v2/sync.sh
                   EOF
 
     # Removing Old action
