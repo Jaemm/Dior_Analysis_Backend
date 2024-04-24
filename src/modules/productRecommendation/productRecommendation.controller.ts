@@ -20,7 +20,7 @@ import { ProductRecommendationEmailDto } from 'src/common/Dto/email/email.dto';
 @Controller('productRecommendation')
 @ApiTags('Product Recommendation')
 export class ProductRecommendationController {
-    constructor(private readonly recommendation: ProductRecommendationService, private readonly email: EmailService) {}
+    constructor(private readonly recommendation: ProductRecommendationService, private readonly email: EmailService) { }
 
     // @ApiExcludeEndpoint()
     @Post('')
@@ -44,7 +44,8 @@ export class ProductRecommendationController {
                 });
             }
 
-            const header = this.recommendation.translation('results_skin_diagnosis_msg', language);
+            const emailTitle = this.recommendation.translation('results_skin_diagnosis_title', language);
+            const emailMessage = this.recommendation.translation('results_skin_diagnosis_msg', language);
             const skincareProducts_: any[] = [];
             const makeupProducts_: any[] = [];
 
@@ -95,7 +96,8 @@ export class ProductRecommendationController {
             }
 
             const dynamicData = {
-                header,
+                emailTitle,
+                emailMessage,
                 weakness1,
                 weaknesScore1,
                 weakness2,
