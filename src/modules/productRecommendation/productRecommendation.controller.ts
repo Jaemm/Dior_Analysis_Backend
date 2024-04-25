@@ -46,6 +46,7 @@ export class ProductRecommendationController {
 
             const emailTitle = this.recommendation.translation('results_skin_diagnosis_title', language);
             const emailMessage = this.recommendation.translation('results_skin_diagnosis_msg', language);
+            const emailSubject = this.recommendation.translation('results_skin_diagnosis_title', language);
             const skincareProducts_: any[] = [];
             const makeupProducts_: any[] = [];
 
@@ -113,7 +114,7 @@ export class ProductRecommendationController {
             };
 
             return this.email
-                .sendEmailTemplate(body.email, 'Your Dior Skin Analyzer Consultation Result', emailFile, dynamicData)
+                .sendEmailTemplate(body.email, String(emailSubject), emailFile, dynamicData)
                 .then(() =>
                     res.status(200).json({
                         status: 200,
