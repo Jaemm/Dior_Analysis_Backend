@@ -58,7 +58,3 @@ jobs:
                       -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                       -H "Accept: application/vnd.github.v3+json"
                   done
-
-            # sudo docker run -d -p 2024:2024 --name test-container-container chowisbackend/test-container:latest
-            # sudo docker pull chowisbackend/test-container:latest
-            # certbot certonly --dns-google --agree-tos \ -d "*.example.com"git

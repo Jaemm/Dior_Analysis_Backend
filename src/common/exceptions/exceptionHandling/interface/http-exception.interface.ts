@@ -16,4 +16,3 @@ export interface CommonErrorResponse {
     RESULTCODE: string;
     RESULTMSG: string;
 }
-

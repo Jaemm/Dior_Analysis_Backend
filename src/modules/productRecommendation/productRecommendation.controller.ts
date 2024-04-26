@@ -58,7 +58,7 @@ export class ProductRecommendationController {
                 }
             }
 
-            const emailFile = 'product_recommendation';
+            const emailFile = 'product_recommendation_updated';
             const weakness1 = productOrder[0]['measurement'];
             const weaknesScore1 = productOrder[0]['value'];
             const weakness2 = productOrder[1]['measurement'];
