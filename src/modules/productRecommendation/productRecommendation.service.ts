@@ -12,7 +12,7 @@ export class ProductRecommendationService {
         private readonly webResult: WebResultService,
         private readonly database: DatabaseService,
         private languageCode: LanaguageToCountryService,
-    ) {}
+    ) { }
 
     translation(key: string, language: string) {
         const filePath = `${process.env.Translation}/webResult.json`;
@@ -24,7 +24,7 @@ export class ProductRecommendationService {
             // console.log(this.translations[language]);
             return this.translations[language][key];
         } else {
-            return this.translations['en'];
+            return this.translations['en'][key];
         }
     }
 
