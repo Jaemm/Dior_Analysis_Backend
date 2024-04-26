@@ -98,7 +98,12 @@ export class ProductRecommendationService {
             (a: any, b: any) => Math.floor(b.avg_value || b.value || 0) - Math.floor(a.avg_value || a.value || 0),
         );
 
-        const top5Value = results.slice(0, 5);
+        let top5Value = results.slice(0, 5);
+
+        top5Value = top5Value.filter((item: any) => item.measurement !== 'skintone');
+        while (top5Value.length < 5) {
+            top5Value.push(results[5]);
+        }
 
         const top5measurement = top5Value.map((item: any) => ({
             measurement: this.translation(item.measurement, language),
