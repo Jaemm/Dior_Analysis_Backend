@@ -49,10 +49,11 @@ export class ProductRecommendationController {
             const makeupProducts_: any[] = [];
 
             for (let i = 0; i < productRec.length; i++) {
-                if (productRec[i]['routine'] === 'Makeup') {
+                if (productRec[i]['routine'].toLowerCase() === 'makeup') {
                     makeupProducts_.push(productRec[i]);
+                } else {
+                    skincareProducts_.push(productRec[i]);
                 }
-                skincareProducts_.push(productRec[i]);
             }
 
             const emailFile = 'product_recommendation_updated';

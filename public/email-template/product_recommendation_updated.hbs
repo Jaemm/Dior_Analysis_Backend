@@ -217,7 +217,7 @@
                             </tbody>
                         </table>
 
-                        {{#if makeupProducts}}
+                        {{#if makeupProducts.length}}
 
                             <hr
                                 style="width:100%;border:none;border-top:1px solid #eaeaea;margin-top:1rem;margin-bottom:1rem"
@@ -231,7 +231,7 @@
 
                             <table style="margin-left:auto;margin-right:auto">
                                 <tbody>
-                                    {{#each makeupProducts.length}}
+                                    {{#each makeupProducts}}
                                         <tr>
                                             <td
                                                 style="box-sizing:border-box;display:inline-block;width:150px;padding-left:0.5rem;padding-right:0.5rem;padding-bottom:1rem;text-align:center;vertical-align:top"
