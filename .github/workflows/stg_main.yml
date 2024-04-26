@@ -1,0 +1,64 @@
+name: Deploy NestJS API
+on:
+    push:
+        branches: [stg_main]
+jobs:
+    e2e_test:
+        runs-on: [ubuntu-latest]
+
+        if: (github.ref == 'refs/heads/stg_main')
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+
+    deploy:
+        needs: e2e_test
+        runs-on: [ubuntu-latest]
+        if: (github.ref == 'refs/heads/stg_main')
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+
+            - name: Install sshpass
+              run: sudo apt-get update && sudo apt-get install -y sshpass
+
+            - name: SSH into server
+              run: |
+                  sshpass -p ${{ secrets.TEST_SERVER_PASSWORD }} ssh -o StrictHostKeyChecking=no -p 2479 backendtestuser@59.12.54.63 -v << EOF
+                    cd /home/backendtestuser/Repositories/BE_dior-analysis-v2/
+                    echo "Pulling latest changes from Git..."
+                    git pull origin stg_main
+                    echo "Running database migration..."
+                    sudo node run-migration.cjs
+                    echo "Installing npm dependencies..."
+                    sudo npm install
+                    echo "Building application..."
+                    sudo npm run build
+                    echo "Restarting the application using PM2..."
+                    sudo pm2 restart ecosystem.config.js
+                    echo "Deployment process completed."
+                  EOF
+        # Removing Old action
+    cleanup-action:
+        runs-on: [ubuntu-latest]
+        needs: deploy
+        continue-on-error: true
+        steps:
+            - name: Cleaning existing Actions
+              run: |
+                  echo "Removing old workflow runs..."
+                  RUNS=$(curl -s -X GET -G "https://api.github.com/repos/${{ github.repository }}/actions/runs" \
+                          -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                          -H "Accept: application/vnd.github.v3+json" \
+                          | jq -r '.workflow_runs[] | select(.id != ${{ github.run_id }}) | .id')
+
+                  for run in $RUNS; do
+                    echo "Deleting workflow run $run"
+                    curl -X DELETE -G "https://api.github.com/repos/${{ github.repository }}/actions/runs/$run" \
+                      -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                      -H "Accept: application/vnd.github.v3+json"
+                  done
+
+            # sudo docker run -d -p 2024:2024 --name test-container-container chowisbackend/test-container:latest
+            # sudo docker pull chowisbackend/test-container:latest
+            # certbot certonly --dns-google --agree-tos \ -d "*.example.com"git

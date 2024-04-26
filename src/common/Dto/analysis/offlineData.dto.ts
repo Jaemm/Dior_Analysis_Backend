@@ -166,7 +166,19 @@ export class OfflineDataCBBDTO {
     @IsObject()
     @ValidateNested()
     @Type(() => MultiArgsDTO)
-    args: MultiArgsDTO;
+    args: MultiArgsDTO | any;
+
+    @IsOptional()
+    batch_id: number;
+
+    @IsOptional()
+    consultant_id: any;
+    @IsOptional()
+    email: any;
+    @IsOptional()
+    app_id: any;
+    @IsOptional()
+    name: any;
 
     //save the skintone
 }

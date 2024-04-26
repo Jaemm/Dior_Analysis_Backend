@@ -80,7 +80,12 @@ export class AlgoAnalysisController {
     @Post('')
     @HttpCode(200)
     @UseInterceptors(FileInterceptor('image'))
-    async getcustomerHistory(@Body() data: any, @UploadedFile() image: Express.Multer.File, @Res() res: Response, @Req() req: Request) {
+    async getcustomerHistory(
+        @Body() data: any,
+        @UploadedFile() image: Express.Multer.File,
+        @Res() res: Response,
+        @Req() req: Request,
+    ) {
         if (!image)
             return res.send({
                 status: 40002,
@@ -118,15 +123,9 @@ export class AlgoAnalysisController {
         let result: any;
 
         if (data.task.taskName === 'CNDP_SkinTone') {
-            result = task.applyAsync([
-                originalImage,
-                process.env.skinToneFile,
-            ]);
+            result = task.applyAsync([originalImage, process.env.skinToneFile]);
         } else if (data.task.taskName === 'CNDP_FitzSG') {
-            result = task.applyAsync([
-                originalImage,
-                process.env.skinToneFile,
-            ]);
+            result = task.applyAsync([originalImage, process.env.skinToneFile]);
         } else {
             result = task.applyAsync([originalImage]);
         }
@@ -161,12 +160,12 @@ export class AlgoAnalysisController {
         const coputaionResutl: any = {};
         const token = req.headers.authorization?.split(' ')[1];
 
-        const args = this.AlgoAnalysis.decodeToken(token)
-        data.consultant_id = args.consultant_id
-        data.email = args.email
-        data.app_id = args.app_id
-        data.name = args.name
-        
+        const args = this.AlgoAnalysis.decodeToken(token);
+        data.consultant_id = args.consultant_id;
+        data.email = args.email;
+        data.app_id = args.app_id;
+        data.name = args.name;
+
         const saving = await this.AlgoAnalysis.finalSave(
             coputaionResutl,
             data,
@@ -184,7 +183,7 @@ export class AlgoAnalysisController {
                 return promise2;
             })
             .catch((error) => {
-                console.log(error)
+                console.log(error);
                 return res.send({
                     status: 500,
                     type: 'InternalServerError',
@@ -452,7 +451,6 @@ export class AlgoAnalysisController {
                             url: analyzedImageArgs.url,
                         },
                     },
-         
                 }),
             );
         });
@@ -594,7 +592,7 @@ export class AlgoAnalysisController {
             let result = task.applyAsync([
                 originalImageFirst,
                 originalImageSecond,
-                "/home/ubuntu/repositories/cfa-python/CNDP/files/chart.png",
+                '/home/ubuntu/repositories/cfa-python/CNDP/files/chart.png',
             ]);
 
             const taskResponse = await result.get();
@@ -657,7 +655,14 @@ export class AlgoAnalysisController {
     @Get('/requestBatchId')
     async getBatchId(@Query() param: historyDTO, @Res() res: Response, @Req() req: Request) {
         try {
-            let { customer_id } = param;
+            let { customer_id, analysis_time } = param;
+
+            let timeOfAnalysis;
+            if (analysis_time) {
+                timeOfAnalysis = analysis_time;
+            } else {
+                timeOfAnalysis = this.AlgoAnalysis.formatDate(new Date());
+            }
 
             if (!customer_id) {
                 return res.status(400).send({
@@ -669,9 +674,9 @@ export class AlgoAnalysisController {
 
             const token = req.headers.authorization?.split(' ')[1];
 
-            const args = this.AlgoAnalysis.decodeToken(token)
+            const args = this.AlgoAnalysis.decodeToken(token);
 
-            const insert = await this.batchAnalysis.insertInAnalysis(customer_id, JSON.stringify(args));
+            const insert = await this.batchAnalysis.insertInAnalysis(customer_id, timeOfAnalysis, JSON.stringify(args));
 
             return res.status(200).json({
                 status: 200,
@@ -679,6 +684,7 @@ export class AlgoAnalysisController {
                 body: { batch_id: insert },
             });
         } catch (e) {
+            console.log(e);
             throw new Error(e);
         }
     }
@@ -736,7 +742,7 @@ export class AlgoAnalysisController {
         @Body() data: any,
         @UploadedFiles() files: { analyzedImage: Express.Multer.File[]; originalImage: Express.Multer.File[] },
         @Res() res: Response,
-        @Req() req: Request
+        @Req() req: Request,
     ) {
         try {
             if (!files?.analyzedImage || !files?.originalImage) {
@@ -754,153 +760,10 @@ export class AlgoAnalysisController {
                     message: 'The number of analyzed images does not match number of original images',
                 });
             }
-
-            data.batch_id = Number(data.batchId);
-
-            let algoId = Number(data.algorithmId); //this.AlgoAnalysis.getCBBTaskByAlgoType(Number(data.type));
-
-
-            const analyzed: any[] = [];
-            const original: any[] = [];
-            const retunAnalyzed: any[] = [];
-            const returnOriginal: any[] = [];
-            let scores: any[] = [];
-            let raw: any[] = [];
-            let promitive = this.AlgoAnalysis.isPrimitive(data.args);
-            if (promitive === true) {
-                if (Array.isArray(data.args.score)) {
-                    scores = JSON.parse(data.args).score;
-                    raw = JSON.parse(data.args).raw;
-                }
-            } else {
-                if (Array.isArray(data.args.score)) {
-                    scores = data.args.score;
-
-                    raw = data.args.raw;
-                }
-                scores.push(data.args.score);
-                raw.push(data.args.raw);
-            }
-            // const savingPromise: Promise<any>[] = [];
-
-            let sum = 0;
-            sum = scores.reduce((accumulator, currentValue) => accumulator + currentValue);
-            const imageRecords = uuidv4();
-            const avg = sum / scores.length;
-            const uploadPromises = [];
-
-            for (let i = 0; i < files.analyzedImage?.length; i++) {
-                const imageArg = this.AlgoAnalysis.handleCBBImageArg(data);
-                analyzed.push([
-                    data.batch_id,
-                    imageArg.analyzedImageArgs.url,
-                    imageArg.analyzedImageArgs.sys_url,
-                    imageArg.analyzedImageArgs.hash,
-                    algoId,
-                    18,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    0,
-                ]);
-
-                original.push([
-                    data.batch_id,
-                    imageArg.originalImageArgs.url,
-                    imageArg.originalImageArgs.sys_url,
-                    imageArg.originalImageArgs.hash,
-                    algoId,
-                    21,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    JSON.stringify({
-                        score: scores[i],
-                        raw: raw[i],
-                        score_average: avg.toFixed(2),
-                        answers: data?.answers === undefined ? '' : data?.answers,
-                    }),
-                ]);
-
-                if (files?.originalImage[i].buffer) {
-                    uploadPromises.push(
-                        this.S3Image.uploadFileToS3(files?.originalImage[i].buffer, imageArg.originalImageArgs.sys_url),
-                    );
-                }
-
-                if (files?.analyzedImage[i].buffer) {
-                    uploadPromises.push(
-                        this.S3Image.uploadFileToS3(files?.analyzedImage[i].buffer, imageArg.analyzedImageArgs.sys_url),
-                    );
-                }
-                //  Image saving
-            }
-
-            const saveOriginal = original.map((item) => {
-                returnOriginal.push({
-                    batchId: data.batch_id,
-                    algorithm_type: data.algorithmId,
-                    score: promitive === true ? JSON.parse(item[7]).score : item[7].score,
-                    originalImage: {
-                        id: item[3],
-                        url: item[1],
-                    },
-                });
-                return {
-                    batch_id: item[0],
-                    url: item[1],
-                    sys_url: item[2],
-                    hash: item[3],
-                    type_measurement_id: item[4],
-                    type_image_id: item[5],
-                    args: item[6],
-                    scores: item[7],
-                };
-            });
-            //return original
-
-            const saveAnalyzed = analyzed.map((item) => {
-                retunAnalyzed.push({
-                    analyzedImage: {
-                        id: item[3],
-                        url: item[1],
-                    },
-                });
-                return {
-                    batch_id: item[0],
-                    url: item[1],
-                    sys_url: item[2],
-                    hash: item[3],
-                    type_measurement_id: item[4],
-                    type_image_id: item[5],
-                    args: item[6],
-                    scores: item[7],
-                };
-            });
-
-            const savedResult = [...saveAnalyzed, ...saveOriginal];
-
-            this.AlgoAnalysis.offlineCBBSaveData(imageRecords, savedResult);
-
-            Promise.all(uploadPromises).catch((e) => {
-                fs.appendFile('error.log', this.AlgoAnalysis.getErrorLog(data.barch_id), 'utf8', (err) => {
-                    if (err) throw err;
-                });
-            });
-
-            res.status(201).send({
-                status: 200,
-                service: 'Offline Analysis Data saving',
-                message: 'Data saved to the cloud',
-            });
             const token = req.headers.authorization?.split(' ')[1];
+            const result = await this.AlgoAnalysis.offlineBBC(data, files, token);
 
-            const args = this.AlgoAnalysis.decodeToken(token)
-            data.consultant_id = args.consultant_id
-            data.email = args.email
-            data.app_id = args.app_id
-            data.name = args.name
-            await this.AlgoAnalysis.updateData(data, imageRecords);
+            res.status(201).send(result);
         } catch (error) {
             console.error(error);
             throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -974,7 +837,7 @@ export class AlgoAnalysisController {
         @Body() data: any,
         @UploadedFiles() files: { image1: Express.Multer.File[]; image2: Express.Multer.File[] },
         @Res() res: Response,
-        @Req() req: Request
+        @Req() req: Request,
     ) {
         console.log('body', data);
         try {
@@ -1124,11 +987,11 @@ export class AlgoAnalysisController {
             });
             const token = req.headers.authorization?.split(' ')[1];
 
-            const args = this.AlgoAnalysis.decodeToken(token)
-            data.consultant_id = args.consultant_id
-            data.email = args.email
-            data.app_id = args.app_id
-            data.name = args.name
+            const args = this.AlgoAnalysis.decodeToken(token);
+            data.consultant_id = args.consultant_id;
+            data.email = args.email;
+            data.app_id = args.app_id;
+            data.name = args.name;
 
             await this.AlgoAnalysis.updateData(data, imageRecords);
         } catch (error) {
