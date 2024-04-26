@@ -20,7 +20,7 @@ import { ProductRecommendationEmailDto } from 'src/common/Dto/email/email.dto';
 @Controller('productRecommendation')
 @ApiTags('Product Recommendation')
 export class ProductRecommendationController {
-    constructor(private readonly recommendation: ProductRecommendationService, private readonly email: EmailService) { }
+    constructor(private readonly recommendation: ProductRecommendationService, private readonly email: EmailService) {}
 
     // @ApiExcludeEndpoint()
     @Post('')
@@ -58,7 +58,7 @@ export class ProductRecommendationController {
                 }
             }
 
-            const emailFile = 'product_recommendation_updated';
+            const emailFile = 'product_recommendation';
             const weakness1 = productOrder[0]['measurement'];
             const weaknesScore1 = productOrder[0]['value'];
             const weakness2 = productOrder[1]['measurement'];
@@ -114,15 +114,13 @@ export class ProductRecommendationController {
                 skincareProducts,
             };
 
-            return this.email
-                .sendEmailTemplate(body.email, String(emailSubject), emailFile, dynamicData)
-                .then(() =>
-                    res.status(200).json({
-                        status: 200,
-                        service: 'Product Recommendation Email',
-                        message: 'Success',
-                    }),
-                );
+            return this.email.sendEmailTemplate(body.email, String(emailSubject), emailFile, dynamicData).then(() =>
+                res.status(200).json({
+                    status: 200,
+                    service: 'Product Recommendation Email',
+                    message: 'Success',
+                }),
+            );
         } catch (e) {
             throw new Error(e);
         }
