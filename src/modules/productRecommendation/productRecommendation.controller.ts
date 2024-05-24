@@ -45,15 +45,18 @@ export class ProductRecommendationController {
                 });
             }
 
-            const header = this.recommendation.translation('results_skin_diagnosis_msg', language);
+            const emailTitle = this.recommendation.translation('results_skin_diagnosis_title', language);
+            const emailMessage = this.recommendation.translation('results_skin_diagnosis_msg', language);
+            const emailSubject = this.recommendation.translation('results_skin_diagnosis_title', language);
             const skincareProducts_: any[] = [];
             const makeupProducts_: any[] = [];
 
             for (let i = 0; i < productRec.length; i++) {
-                if (productRec[i]['routine'] === 'Makeup') {
+                if (productRec[i]['routine'].toLowerCase() === 'makeup') {
                     makeupProducts_.push(productRec[i]);
+                } else {
+                    skincareProducts_.push(productRec[i]);
                 }
-                skincareProducts_.push(productRec[i]);
             }
 
             const emailFile = 'product_recommendation_updated';
@@ -96,7 +99,8 @@ export class ProductRecommendationController {
             }
 
             const dynamicData = {
-                header,
+                emailTitle,
+                emailMessage,
                 weakness1,
                 weaknesScore1,
                 weakness2,
@@ -111,15 +115,13 @@ export class ProductRecommendationController {
                 skincareProducts,
             };
 
-            return this.email
-                .sendEmailTemplate(body.email, 'Your Dior Skin Analyzer Consultation Result', emailFile, dynamicData)
-                .then(() =>
-                    res.status(200).json({
-                        status: 200,
-                        service: 'Product Recommendation Email',
-                        message: 'Success',
-                    }),
-                );
+            return this.email.sendEmailTemplate(body.email, String(emailSubject), emailFile, dynamicData).then(() =>
+                res.status(200).json({
+                    status: 200,
+                    service: 'Product Recommendation Email',
+                    message: 'Success',
+                }),
+            );
         } catch (e) {
             throw new Error(e);
         }

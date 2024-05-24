@@ -26,6 +26,13 @@ jobs:
               run: |
                   sshpass -p ${{ secrets.TEST_SERVER_PASSWORD }} ssh -o StrictHostKeyChecking=no -p 2479 backendtestuser@59.12.54.63 -v << EOF
                     cd /home/backendtestuser/Repositories/BE_dior-analysis-v2/
+
+                    if git status --porcelain | grep .; then
+                      echo "Working directory is not clean, commit changes"
+                      git add .
+                      git commit -m "Committing changes before pulling from remote"
+                    fi
+                    
                     echo "Pulling latest changes from Git..."
                     git pull origin stg_main
                     echo "Running database migration..."
@@ -58,7 +65,3 @@ jobs:
                       -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                       -H "Accept: application/vnd.github.v3+json"
                   done
-
-            # sudo docker run -d -p 2024:2024 --name test-container-container chowisbackend/test-container:latest
-            # sudo docker pull chowisbackend/test-container:latest
-            # certbot certonly --dns-google --agree-tos \ -d "*.example.com"git
