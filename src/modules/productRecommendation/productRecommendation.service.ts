@@ -32,7 +32,7 @@ export class ProductRecommendationService {
         let saveSql;
         let result;
 
-        const newCode = this.languageCode.lanaguageToCountry(language.toLocaleUpperCase());
+        const newCode = this.languageCode.lanaguageToCountry(language.toLocaleUpperCase()) ?? 'EN';
 
         if (language === 'en') {
             saveSql = `
