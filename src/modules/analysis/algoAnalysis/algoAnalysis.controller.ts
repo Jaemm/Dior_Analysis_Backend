@@ -157,7 +157,7 @@ export class AlgoAnalysisController {
                 }),
             );
         });
-        const coputaionResutl: any = {};
+        const computaionResutl: any = {};
         const token = req.headers.authorization?.split(' ')[1];
 
         const args = this.AlgoAnalysis.decodeToken(token);
@@ -167,7 +167,7 @@ export class AlgoAnalysisController {
         data.name = args.name;
 
         const saving = await this.AlgoAnalysis.finalSave(
-            coputaionResutl,
+            computaionResutl,
             data,
             image,
             imageRecords,
@@ -1000,4 +1000,3 @@ export class AlgoAnalysisController {
         }
     }
 }
-

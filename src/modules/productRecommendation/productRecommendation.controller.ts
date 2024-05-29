@@ -31,11 +31,10 @@ export class ProductRecommendationController {
     ) {
         try {
             let language = chowisLocale ?? 'en';
-
             if (language.length > 4 || language.length < 1) language = 'en';
 
+            console.log('language', language);
             const productOrder = await this.recommendation.scoresSorting(body.batchId, language);
-
             const productRec = await this.recommendation.getRecommendedProduct(body.batchId, language);
 
             if (productOrder.length === 0 || productRec.length === 0) {
@@ -46,20 +45,21 @@ export class ProductRecommendationController {
                 });
             }
 
-            const header = this.recommendation.translation('results_skin_diagnosis_msg', language);
-
-            const skincareProducts: any[] = [];
-            const makeupProducts: any[] = [];
+            const emailTitle = this.recommendation.translation('results_skin_diagnosis_title', language);
+            const emailMessage = this.recommendation.translation('results_skin_diagnosis_msg', language);
+            const emailSubject = this.recommendation.translation('results_skin_diagnosis_title', language);
+            const skincareProducts_: any[] = [];
+            const makeupProducts_: any[] = [];
 
             for (let i = 0; i < productRec.length; i++) {
-                if (productRec[i]['routine'] === 'Makeup') {
-                    makeupProducts.push(productRec[i]);
+                if (productRec[i]['routine'].toLowerCase() === 'makeup') {
+                    makeupProducts_.push(productRec[i]);
+                } else {
+                    skincareProducts_.push(productRec[i]);
                 }
-                skincareProducts.push(productRec[i]);
             }
 
-            const emailFile = 'product_recommendation';
-
+            const emailFile = 'product_recommendation_updated';
             const weakness1 = productOrder[0]['measurement'];
             const weaknesScore1 = productOrder[0]['value'];
             const weakness2 = productOrder[1]['measurement'];
@@ -71,8 +71,36 @@ export class ProductRecommendationController {
             const weakness5 = productOrder[4]['measurement'];
             const weaknesScore5 = productOrder[4]['value'];
 
+            const groupSize = 2;
+            const skincareProducts = [];
+            const makeupProducts = [];
+
+            for (let i = 0; i < skincareProducts_.length; i += groupSize) {
+                const group = skincareProducts_.slice(i, i + groupSize);
+                const formattedGroup: any = {};
+
+                for (let j = 0; j < group.length; j++) {
+                    formattedGroup[`product${j + 1}`] = group[j];
+                }
+
+                skincareProducts.push(formattedGroup);
+            }
+
+            // In case of makup
+            for (let i = 0; i < makeupProducts_.length; i += groupSize) {
+                const group = makeupProducts_.slice(i, i + groupSize);
+                const formattedGroup: any = {};
+
+                for (let j = 0; j < group.length; j++) {
+                    formattedGroup[`product${j + 1}`] = group[j];
+                }
+
+                makeupProducts.push(formattedGroup);
+            }
+
             const dynamicData = {
-                header,
+                emailTitle,
+                emailMessage,
                 weakness1,
                 weaknesScore1,
                 weakness2,
@@ -87,17 +115,14 @@ export class ProductRecommendationController {
                 skincareProducts,
             };
 
-            return this.email
-                .sendEmailTemplate(body.email, 'Your Dior Skin Analyzer Consultation Result', emailFile, dynamicData)
-                .then(() =>
-                    res.status(200).json({
-                        status: 200,
-                        service: 'Product Recommendation Email',
-                        message: 'Success',
-                    }),
-                );
+            return this.email.sendEmailTemplate(body.email, String(emailSubject), emailFile, dynamicData).then(() =>
+                res.status(200).json({
+                    status: 200,
+                    service: 'Product Recommendation Email',
+                    message: 'Success',
+                }),
+            );
         } catch (e) {
-            console.log('===>', e);
             throw new Error(e);
         }
     }

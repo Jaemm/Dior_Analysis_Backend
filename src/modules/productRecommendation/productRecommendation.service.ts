@@ -21,10 +21,10 @@ export class ProductRecommendationService {
         this.translations = JSON.parse(fileContent);
 
         if (this.translations[language] && this.translations[language][key]) {
-            console.log(this.translations[language]);
+            // console.log(this.translations[language]);
             return this.translations[language][key];
         } else {
-            return this.translations['en'];
+            return this.translations['en'][key];
         }
     }
 
@@ -32,7 +32,8 @@ export class ProductRecommendationService {
         let saveSql;
         let result;
 
-        const newCode = this.languageCode.lanaguageToCountry(language.toLocaleUpperCase()) ?? 'EN';
+        // console.
+        const newCode = this.languageCode.lanaguageToCountry(language?.toLocaleUpperCase()) ?? 'EN';
 
         if (language === 'en') {
             saveSql = `
@@ -76,7 +77,7 @@ export class ProductRecommendationService {
                 WHERE
                     prc.batch_id = $1
                     AND prc.created_at > '2024-01-01';`;
-            console.log('newCode.toUpperCase()', newCode.toUpperCase());
+
             const queries = [batchId, newCode.toUpperCase()];
             result = await this.database.crmQuery(saveSql, queries);
 
@@ -98,7 +99,12 @@ export class ProductRecommendationService {
             (a: any, b: any) => Math.floor(b.avg_value || b.value || 0) - Math.floor(a.avg_value || a.value || 0),
         );
 
-        const top5Value = results.slice(0, 5);
+        let top5Value = results.slice(0, 5);
+
+        top5Value = top5Value.filter((item: any) => item.measurement !== 'skintone');
+        while (top5Value.length < 5) {
+            top5Value.push(results[5]);
+        }
 
         const top5measurement = top5Value.map((item: any) => ({
             measurement: this.translation(item.measurement, language),
@@ -116,4 +122,3 @@ export class ProductRecommendationService {
         return top5mesurement;
     }
 }
-

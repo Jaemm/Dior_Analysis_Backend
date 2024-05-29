@@ -82,9 +82,6 @@ export class ComputationService {
         let extractAnswer = '';
         let questionnaireScore = 0;
         if (!answers || answers?.length === 0) {
-            console.log(answers);
-            console.log('---->', questionnaireScore);
-
             return questionnaireScore;
         }
         if (answers.length === 4) {
@@ -267,4 +264,3 @@ export class ComputationService {
         }
     }
 }
-
