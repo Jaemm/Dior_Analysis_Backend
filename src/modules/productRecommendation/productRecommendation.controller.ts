@@ -37,6 +37,10 @@ export class ProductRecommendationController {
             const productOrder = await this.recommendation.scoresSorting(body.batchId, language);
             const productRec = await this.recommendation.getRecommendedProduct(body.batchId, language);
 
+            console.log('productOrder', productOrder);
+
+            console.log('productRec', productRec);
+
             if (productOrder.length === 0 || productRec.length === 0) {
                 return res.status(400).json({
                     status: 400,
@@ -142,4 +146,3 @@ export class ProductRecommendationController {
         }
     }
 }
-
