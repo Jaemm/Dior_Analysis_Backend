@@ -44,7 +44,17 @@ export class ProductRecommendationService {
                     pr."routine" as routine 
                 FROM "product_recommendation_selecteds" prc
                 LEFT JOIN product_recommendations pr ON pr.id = prc.product_recommendation_id
-                WHERE batch_id = $1 AND prc.created_at > '2024-01-01'`;
+                WHERE batch_id = $1 AND prc.created_at > '2024-01-01'
+                    AND DATE(prc.created_at) = (
+                    SELECT 
+                        DATE(p.created_at)
+                    FROM 
+                        product_recommendation_selecteds p
+                    WHERE 
+                        p.batch_id = $1
+                    LIMIT 1
+                )
+                `;
             const queries = [batchId];
             result = await this.database.crmQuery(saveSql, queries);
         } else {
@@ -76,7 +86,16 @@ export class ProductRecommendationService {
                     ) AS at ON at.value	= collection
                 WHERE
                     prc.batch_id = $1
-                    AND prc.created_at > '2024-01-01';`;
+                    AND prc.created_at > '2024-01-01'
+                    AND DATE(prc.created_at) = (
+                        SELECT 
+                            DATE(p.created_at)
+                        FROM 
+                            product_recommendation_selecteds p
+                        WHERE 
+                            p.batch_id = $1
+                        LIMIT 1
+                    )`;
 
             const queries = [batchId, newCode.toUpperCase()];
             result = await this.database.crmQuery(saveSql, queries);
