@@ -150,3 +150,22 @@ export class MoistureDTO {
     score: any;
 }
 
+// save flag
+
+export class SaveFlagDto {
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 5462,
+    })
+    @IsNotEmpty()
+    batch_id: number | string;
+
+    @ApiProperty({
+        type: String,
+        description: 'This is required',
+        example: 'true',
+    })
+    @IsNotEmpty()
+    status: any;
+}

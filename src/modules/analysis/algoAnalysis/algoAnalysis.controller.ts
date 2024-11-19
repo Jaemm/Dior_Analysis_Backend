@@ -29,7 +29,7 @@ import {
     historyDTO,
     paginationDTO,
 } from 'src/common/Dto/analysis/algoAnalysis.dto';
-import { MoistureDTO } from 'src/common/Dto/analysis/moisture.dto';
+import { MoistureDTO, SaveFlagDto } from 'src/common/Dto/analysis/moisture.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { MoistureUService } from 'src/modules/algorithms/moistureU/moistureU.service';
 import { MoistureTService } from 'src/modules/algorithms/moistureT/moistureT.service';
@@ -49,8 +49,6 @@ import {
     ApiResponse,
     ApiTags,
 } from '@nestjs/swagger';
-
-// import * as jwt from 'jsonwebtoken';
 import * as fs from 'fs';
 
 @ApiTags('Analysis')
@@ -367,11 +365,11 @@ export class AlgoAnalysisController {
         }
     }
 
-    @ApiExcludeEndpoint()
+    // @ApiExcludeEndpoint()
     @UseGuards(AuthMiddleware)
     @ApiBearerAuth('access-token')
     @ApiConsumes('multipart/form-data')
-    @ApiBody({ type: MoistureDTO })
+    @ApiBody({ type: SaveFlagDto })
     @Post('/analysisFlag')
     async analysisFlag(@Res() res: Response, @Body() body: any) {
         try {
@@ -384,6 +382,8 @@ export class AlgoAnalysisController {
                 });
             }
             let batchId = await this.AlgoAnalysis.analysisFlag(batch_id, status);
+
+            console.log(batchId);
             return res.status(201).send({
                 status: 200,
                 service: 'Successful Analysis Flag saving',
