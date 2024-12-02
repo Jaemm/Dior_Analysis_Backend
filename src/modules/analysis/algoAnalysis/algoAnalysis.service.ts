@@ -1752,7 +1752,7 @@ export class AlgoAnalysisService {
 
         return result;
     }
-
+    //
     decodeToken(token: any) {
         if (!token) {
             throw new UnauthorizedException(10002, 'You are unauthorized, try refreshing the page.');
@@ -1761,12 +1761,13 @@ export class AlgoAnalysisService {
         const decoded: any = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
         const args = {
-            consultant_id: decoded['consultant_id'],
-            email: decoded['email'],
-            app_id: decoded['app_id'],
-            name: decoded['name'],
+            consultant_id: decoded['consultant_id'] ?? decoded['id'],
+            email: decoded['email'] ?? decoded['sub'],
+            app_id: decoded['app_id'] ?? 88,
+            name: decoded['name'] ?? '',
         };
 
+        console.log('=====>', args);
         return args;
     }
 
@@ -1936,4 +1937,3 @@ export class AlgoAnalysisService {
         };
     }
 }
-
