@@ -146,3 +146,116 @@ export class ProductRecommendationController {
         }
     }
 }
+// import {
+//     Controller,
+//     Body,
+//     Post,
+//     Res,
+//     Headers,
+//     HttpException,
+//     HttpStatus
+// } from '@nestjs/common';
+// import { ProductRecommendationService } from './productRecommendation.service';
+// import { ApiTags } from '@nestjs/swagger';
+// import { Response } from 'express';
+// import { EmailService } from '../email/email.service';
+// import { ProductRecommendationEmailDto } from 'src/common/Dto/email/email.dto';
+
+// @Controller('productRecommendation')
+// @ApiTags('Product Recommendation')
+// export class ProductRecommendationController {
+//     constructor(
+//         private readonly recommendation: ProductRecommendationService,
+//         private readonly email: EmailService
+//     ) {}
+
+//     @Post('')
+//     async getProductByEmail(
+//         @Body() body: ProductRecommendationEmailDto,
+//         @Headers('x-chowis-locale') chowisLocale: string,
+//         @Res() res: Response,
+//     ) {
+//         try {
+//             let language = chowisLocale ?? 'en';
+//             if (language.length > 4 || language.length < 1) language = 'en';
+    
+//             console.log('[DEBUG] Fetching scoresSorting... batchId:', body.batchId, 'language:', language);
+//             const productOrder = await this.recommendation.scoresSorting(body.batchId, language);
+//             console.log('[DEBUG] Raw productOrder:', JSON.stringify(productOrder, null, 2));
+    
+//             if (!productOrder || !Array.isArray(productOrder) || productOrder.length === 0) {
+//                 console.error('[ERROR] Empty or invalid productOrder:', productOrder);
+//                 return res.status(400).json({
+//                     status: 400,
+//                     service: 'getBatchId',
+//                     message: 'Result not found, email not sent',
+//                 });
+//             }
+    
+//             console.log('[DEBUG] Fetching getRecommendedProduct...');
+//             const productRec = await this.recommendation.getRecommendedProduct(body.batchId, language);
+//             console.log('[DEBUG] Raw productRec:', JSON.stringify(productRec, null, 2));
+    
+//             if (!productRec || !Array.isArray(productRec) || productRec.length === 0) {
+//                 console.error('[ERROR] Empty or invalid productRec:', productRec);
+//                 return res.status(400).json({
+//                     status: 400,
+//                     service: 'getBatchId',
+//                     message: 'Result not found, email not sent',
+//                 });
+//             }
+    
+//             // 🔍 productOrder 내부 데이터 확인
+//             console.log('[DEBUG] Checking each item in productOrder before filtering:');
+//             productOrder.forEach((item, index) => {
+//                 console.log(`[DEBUG] item[${index}] =`, item);
+//             });
+    
+//             // 🔍 필터링된 데이터 확인
+//             const safeProductOrder = productOrder.filter(item => item && item.measurement !== undefined);
+//             console.log('[DEBUG] Filtered safeProductOrder:', JSON.stringify(safeProductOrder, null, 2));
+    
+//             if (safeProductOrder.length < 5) {
+//                 console.error('[ERROR] Insufficient measurement data:', safeProductOrder);
+//                 return res.status(400).json({
+//                     status: 400,
+//                     service: 'getBatchId',
+//                     message: `Insufficient measurement data. Found only ${safeProductOrder.length}`,
+//                 });
+//             }
+    
+//             // 🔍 특정 인덱스의 데이터가 정상적으로 들어오는지 확인
+//             console.log('[DEBUG] Checking individual weaknesses:');
+//             safeProductOrder.slice(0, 5).forEach((item, index) => {
+//                 console.log(`[DEBUG] weakness${index + 1} =`, item);
+//             });
+    
+//             const weakness1 = safeProductOrder[0].measurement;
+//             const weaknessScore1 = safeProductOrder[0].value;
+//             const weakness2 = safeProductOrder[1].measurement;
+//             const weaknessScore2 = safeProductOrder[1].value;
+//             const weakness3 = safeProductOrder[2].measurement;
+//             const weaknessScore3 = safeProductOrder[2].value;
+//             const weakness4 = safeProductOrder[3].measurement;
+//             const weaknessScore4 = safeProductOrder[3].value;
+//             const weakness5 = safeProductOrder[4].measurement;
+//             const weaknessScore5 = safeProductOrder[4].value;
+    
+//             return res.status(200).json({
+//                 status: 200,
+//                 service: 'Product Recommendation',
+//                 message: 'Success',
+//             });
+    
+//         } catch (error) {
+//             console.error('[ERROR] Error processing product recommendation:', error);
+        
+//             throw new HttpException(
+//                 { status: 500, message: error.message || 'Internal Server Error' },
+//                 HttpStatus.INTERNAL_SERVER_ERROR
+//             );
+//         }
+//     }
+    
+    
+// }

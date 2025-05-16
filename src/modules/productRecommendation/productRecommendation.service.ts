@@ -42,18 +42,22 @@ export class ProductRecommendationService {
                     pr.collection as collection, 
                     pr.image_url as image, 
                     pr."routine" as routine 
-                FROM "product_recommendation_selecteds" prc
-                LEFT JOIN product_recommendations pr ON pr.id = prc.product_recommendation_id
-                WHERE batch_id = $1 AND prc.created_at > '2024-01-01'
+                FROM 
+                    "product_recommendation_selecteds" prc
+                LEFT JOIN 
+                    product_recommendations pr ON pr.id = prc.product_recommendation_id
+                WHERE 
+                    batch_id = $1 
+                    AND prc.created_at > '2024-01-01'
                     AND DATE(prc.created_at) = (
-                    SELECT 
-                        DATE(p.created_at)
-                    FROM 
-                        product_recommendation_selecteds p
-                    WHERE 
-                        p.batch_id = $1
-                    LIMIT 1
-                )
+                        SELECT 
+                            MAX(DATE(p.created_at))
+                        FROM 
+                            product_recommendation_selecteds p
+                        WHERE 
+                            p.batch_id = $1
+                            LIMIT 1
+                    )
                 `;
             const queries = [batchId];
             result = await this.database.crmQuery(saveSql, queries);
