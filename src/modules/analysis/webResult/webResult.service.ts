@@ -30,8 +30,8 @@ export class WebResultService {
                 SELECT DISTINCT
                     type_measurements."name" AS measurement,
                     to_json(original_img.scores) ->> 'score' as value,
-                    record.created_time::date as date,
-                    record.created_time::time as time,
+                    record.created_time as date,
+                    record.created_time as time,
                     original_img.url AS original_image_url,
                     analyzed_img.url AS analyzed_image_url,
                     ROW_NUMBER() OVER (PARTITION BY type_measurements."name") AS ROW_NUMBER
@@ -92,14 +92,12 @@ export class WebResultService {
 
         const avg = await this.webResultAverage(batch_id);
 
-        // console.log(result);
         let moistureT = null;
         let moistureU = null;
         let sebumT = null;
         let sebumU = null;
 
         for (let i = 0; i < result.length; i++) {
-            // console.log(result[i]['measurement'] === );
             if (result[i]['measurement'] === 'moistureT' || result[i]['measurement'] === 'moistureU') {
                 result[i]['analyzed_image_url'] = null;
                 result[i]['original_image_url'] = null;
@@ -136,8 +134,8 @@ export class WebResultService {
         result.push({
             measurement: 'hydration',
             value: dehydration,
-            date: null,
-            time: null,
+            date: result[0]?.date || new Date().toISOString().substring(0, 10),
+            time: result[0]?.time || new Date().toISOString().substring(11, 19),
             original_image_url: null,
             analyzed_image_url: null,
             avg_value: dehydration,
