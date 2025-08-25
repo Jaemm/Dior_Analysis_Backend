@@ -30,8 +30,8 @@ export class WebResultService {
                 SELECT DISTINCT
                     type_measurements."name" AS measurement,
                     to_json(original_img.scores) ->> 'score' as value,
-                    record.created_time as date,
-                    record.created_time as time,
+                    (record.created_time AT TIME ZONE 'UTC') as date,
+                    (record.created_time AT TIME ZONE 'UTC') as time,
                     original_img.url AS original_image_url,
                     analyzed_img.url AS analyzed_image_url,
                     ROW_NUMBER() OVER (PARTITION BY type_measurements."name") AS ROW_NUMBER
@@ -43,7 +43,7 @@ export class WebResultService {
                         AND (original_img.args ->> 'nth_analysis' = analyzed_img.args ->> 'nth_analysis' OR type_measurements."name" = 'moistureT' OR type_measurements."name" = 'moistureU') -- Add the join condition here                 
                 WHERE
                     record.batch_id = $1 AND (analyzed_img.type_image_id = 18)  
-                GROUP by type_measurements."name", original_img.url, analyzed_img.url, original_img.scores, record.created_time, original_img.type_measurement_id
+                    GROUP by type_measurements."name", original_img.url, analyzed_img.url, original_img.scores, record.created_time, original_img.type_measurement_id
             )
             SELECT
                 measurement,
@@ -144,4 +144,3 @@ export class WebResultService {
         return result;
     }
 }
-
