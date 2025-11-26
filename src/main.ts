@@ -36,25 +36,28 @@ async function bootstrap() {
     const hostname = process.env.HOSTNAME || 'localhost';
 
     if (enableSwagger) {
-        const config = new DocumentBuilder() //sensitivity scabs
+        const config = new DocumentBuilder()
             .setTitle('DIOR CNDP SKIN - VERSION 2')
             .setDescription(
-                '<b>HOST</b><br><br> <b>STAGING SERVER</b>: https://staging.chowis.cloud:4411 <b> <br><br> PRODUCTION SERVER</b>: https://v2-api.chowis.cloud:4001<br><br>' +
-                    '<b>ALGO LIST</b><br><br>' +
-                    '1. pores<br> 2. sensitivity<br> 3. impurities<br> 4. wrinkles<br> 5. sebumU<br> 6. sebumT<br> 7. spots<br> 8. skintone<br> 9. shine<br> 10. keratin<br><br>' +
-                    '<b>NOTE: </b><br> <b>1. /analysis/dataUpload</b><br>' +
-                    '- All analyzed and original images should synchronize simultaneously for each (one) analysis.<br> <u><b>Example</b></u> if there are five original and analyzed images of wrinkles, the upload API should be invoked once, prompting a request (with as an array of images) to save all the images.<br><br>' +
-                    '- It is recommended to save answers from the answers field /analysis/dataUpload instead of using /question/save API <br><br>' +
-                    '- Use the id beside each analysis name in the list as algotithmId for data upload <br><br>' +
-                    '<b>2. Remark</b><br>' +
-                    '- This is newly refactored code intended to contain all the old APIs. However, it is possible to encounter some mismatches in the response body of certain APIs.',
+                '<b>HOST</b><br><br>' +
+                    '<b>STAGING SERVER</b>: https://staging.chowis.cloud:4800<br><br>' +
+                    '<b>PRODUCTION SERVER</b>: https://dior-analysis.chowis.cloud:4800<br><br>',
             )
             .setVersion('2.0.0')
-            .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'Token' }, 'access-token')
+            .addBearerAuth(
+                {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'Token',
+                },
+                'access-token',
+            )
             .build();
+
         const document = SwaggerModule.createDocument(app, config);
         SwaggerModule.setup('docs', app, document);
     }
+
     app.use(cookieParser());
 
     app.useGlobalPipes(
