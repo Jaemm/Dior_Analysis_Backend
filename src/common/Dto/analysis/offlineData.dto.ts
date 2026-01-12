@@ -387,5 +387,16 @@ export class SkinToneUploadDTO {
     averageB: string;
 
     algorithmId: number;
+
+    @ApiProperty({
+        type: Boolean,
+        description: 'Whether the device is NG device',
+        example: false,
+        default: false,
+    })
+    is_ngdevice: boolean = false;
+
+    @IsOptional()
+    optic_number: string;
 }
 

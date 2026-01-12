@@ -835,11 +835,13 @@ export class AlgoAnalysisController {
     )
     async offlineSkinTone(
         @Body() data: any,
-        @UploadedFiles() files: { image1: Express.Multer.File[]; image2: Express.Multer.File[] },
+        @UploadedFiles()
+        files: { image1: Express.Multer.File[]; image2: Express.Multer.File[] },
         @Res() res: Response,
         @Req() req: Request,
     ) {
         console.log('body', data);
+
         try {
             if (!files?.image1 || !files?.image2) {
                 return res.status(HttpStatus.BAD_REQUEST).send({
@@ -849,7 +851,7 @@ export class AlgoAnalysisController {
                 });
             }
 
-            if (files?.image1.length !== files?.image2.length) {
+            if (files.image1.length !== files.image2.length) {
                 return res.status(HttpStatus.BAD_REQUEST).send({
                     status: 40002,
                     type: 'BadRequestError',
@@ -857,22 +859,41 @@ export class AlgoAnalysisController {
                 });
             }
 
+            // batch_id 정리
             data.batch_id = Number(data.batchId);
 
-            let algoId = 8; //this.AlgoAnalysis.getCBBTaskByAlgoType(Number(data.type));
+            // algorithmId 고정
+            const algoId = 8;
             data.algorithmId = algoId;
 
             const analyzed: any[] = [];
             const original: any[] = [];
-            const retunAnalyzed: any[] = [];
-            const returnOriginal: any[] = [];
-
-            const imageRecords = uuidv4();
-            // const avg = sum / scores.length;
             const uploadPromises = [];
 
-            for (let i = 0; i < files.image1?.length; i++) {
+            const imageRecords = uuidv4();
+
+            data.is_ngdevice = String(data.is_ngdevice).toLowerCase() === 'true';
+
+            // 공통 scores payload
+            const scorePayload = JSON.stringify({
+                shade: data.shade,
+                raw1: data.raw1 ?? null,
+                raw2: data.raw2 ?? null,
+                averageR: data.averageR ?? null,
+                averageG: data.averageG ?? null,
+                averageB: data.averageB ?? null,
+                is_ngdevice: data.is_ngdevice ?? false,
+            });
+
+            // 공통 args payload
+            const argsPayload = JSON.stringify({
+                nth_analysis: imageRecords,
+            });
+
+            for (let i = 0; i < files.image1.length; i++) {
                 const imageArg = this.AlgoAnalysis.handleCBBImageArg(data);
+
+                // analyzed row
                 analyzed.push([
                     data.batch_id,
                     imageArg.analyzedImageArgs.url,
@@ -880,20 +901,11 @@ export class AlgoAnalysisController {
                     imageArg.analyzedImageArgs.hash,
                     algoId,
                     18,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    JSON.stringify({
-                        shade: data.shade,
-                        raw1: data?.raw1 ?? null,
-                        raw2: data?.raw2 ?? null,
-                        averageR: data?.averageR ?? null,
-                        averageG: data?.averageG ?? null,
-                        averageB: data?.averageB ?? null,
-                    }),
-                    ,
+                    argsPayload,
+                    scorePayload,
                 ]);
 
+                // original row
                 original.push([
                     data.batch_id,
                     imageArg.originalImageArgs.url,
@@ -901,102 +913,88 @@ export class AlgoAnalysisController {
                     imageArg.originalImageArgs.hash,
                     algoId,
                     21,
-                    JSON.stringify({
-                        nth_analysis: imageRecords,
-                    }),
-                    JSON.stringify({
-                        shade: data.shade,
-                        raw1: data?.raw1 ?? null,
-                        raw2: data?.raw2 ?? null,
-                        averageR: data?.averageR ?? null,
-                        averageG: data?.averageG ?? null,
-                        averageB: data?.averageB ?? null,
-                    }),
+                    argsPayload,
+                    scorePayload,
                 ]);
 
-                if (files?.image1[i].buffer) {
-                    uploadPromises.push(
-                        this.S3Image.uploadFileToS3(files?.image1[i].buffer, imageArg.originalImageArgs.sys_url),
-                    );
-                }
+                // S3 upload
+                uploadPromises.push(
+                    this.S3Image.uploadFileToS3(files.image1[i].buffer, imageArg.originalImageArgs.sys_url),
+                );
 
-                if (files?.image2[i].buffer) {
-                    uploadPromises.push(
-                        this.S3Image.uploadFileToS3(files?.image2[i].buffer, imageArg.analyzedImageArgs.sys_url),
-                    );
-                }
-                //  Image saving
+                uploadPromises.push(
+                    this.S3Image.uploadFileToS3(files.image2[i].buffer, imageArg.analyzedImageArgs.sys_url),
+                );
             }
 
-            const saveOriginal = original.map((item) => {
-                returnOriginal.push({
-                    batchId: data.batch_id,
-                    algorithm_type: data.algorithmId,
+            const saveOriginal = original.map((item) => ({
+                batch_id: item[0],
+                url: item[1],
+                sys_url: item[2],
+                hash: item[3],
+                type_measurement_id: item[4],
+                type_image_id: item[5],
+                args: item[6],
+                scores: item[7],
+            }));
 
-                    originalImage: {
-                        id: item[3],
-                        url: item[1],
-                    },
-                });
-                return {
-                    batch_id: item[0],
-                    url: item[1],
-                    sys_url: item[2],
-                    hash: item[3],
-                    type_measurement_id: item[4],
-                    type_image_id: item[5],
-                    args: item[6],
-                    scores: item[7],
-                };
-            });
-            //return original
-
-            const saveAnalyzed = analyzed.map((item) => {
-                retunAnalyzed.push({
-                    analyzedImage: {
-                        id: item[3],
-                        url: item[1],
-                    },
-                });
-                return {
-                    batch_id: item[0],
-                    url: item[1],
-                    sys_url: item[2],
-                    hash: item[3],
-                    type_measurement_id: item[4],
-                    type_image_id: item[5],
-                    args: item[6],
-                    scores: item[7],
-                };
-            });
+            const saveAnalyzed = analyzed.map((item) => ({
+                batch_id: item[0],
+                url: item[1],
+                sys_url: item[2],
+                hash: item[3],
+                type_measurement_id: item[4],
+                type_image_id: item[5],
+                args: item[6],
+                scores: item[7],
+            }));
 
             const savedResult = [...saveAnalyzed, ...saveOriginal];
 
             this.AlgoAnalysis.offlineCBBSaveData(imageRecords, savedResult);
 
-            Promise.all(uploadPromises).catch((e) => {
-                fs.appendFile('error.log', this.AlgoAnalysis.getErrorLog(data.barch_id), 'utf8', (err) => {
-                    if (err) throw err;
-                });
+            Promise.all(uploadPromises).catch(() => {
+                fs.appendFile('error.log', this.AlgoAnalysis.getErrorLog(data.batch_id), 'utf8', () => {});
             });
 
-            res.status(201).send({
-                status: 200,
-                service: 'Offline Analysis Data saving',
-                message: 'Data saved to the cloud',
-            });
+            // 토큰 정보 decode
             const token = req.headers.authorization?.split(' ')[1];
-
             const args = this.AlgoAnalysis.decodeToken(token);
+
             data.consultant_id = args.consultant_id;
             data.email = args.email;
             data.app_id = args.app_id;
             data.name = args.name;
 
+            //  NG Device 이메일 발송
+            if (data.is_ngdevice) {
+                try {
+                    await this.AlgoAnalysis.sendNgDeviceAlertMail({
+                        consultant_id: data.consultant_id,
+                        email: data.email,
+                        app_id: data.app_id,
+                        name: data.name,
+                        batch_id: data.batch_id,
+                        optic_number: data.optic_number,
+                    });
+                } catch (mailErr) {
+                    console.error('[Email] NG Device 이메일 발송 실패:', mailErr);
+                }
+            }
+
+            // update 처리
             await this.AlgoAnalysis.updateData(data, imageRecords);
+
+            // 클라이언트 응답
+            res.status(200).send({
+                status: 200,
+                service: 'Offline Analysis Data saving',
+                message: 'Data saved to the cloud',
+            });
         } catch (error) {
             console.error(error);
             throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
+

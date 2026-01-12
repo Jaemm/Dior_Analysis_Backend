@@ -28,6 +28,7 @@ import { OfflineDataCBBDTO } from 'src/common/Dto/analysis/offlineData.dto';
 import * as jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class AlgoAnalysisService {
@@ -1936,4 +1937,55 @@ export class AlgoAnalysisService {
             message: 'Data saved to the cloud',
         };
     }
+
+    async sendNgDeviceAlertMail(payload: {
+        consultant_id: number;
+        email: string;
+        app_id: number;
+        name: string;
+        batch_id: number;
+        optic_number?: string; // ← 여기도 추가
+    }) {
+        try {
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: Number(process.env.SMTP_PORT),
+                secure: Number(process.env.SMTP_PORT) === 465,
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASSWORD,
+                },
+            });
+
+            const subject = `[NG Device Alert] Consultant ID: ${payload.consultant_id}`;
+
+            const html = `
+            <h2>⚠ NG Device Detected</h2>
+            <p>다음 사용자에게서 <b>NG Device</b> 업로드가 감지되었습니다.</p>
+
+            <ul>
+                <li><b>Consultant ID:</b> ${payload.consultant_id}</li>
+                <li><b>Name:</b> ${payload.name}</li>
+                <li><b>Email:</b> ${payload.email}</li>
+                <li><b>App ID:</b> ${payload.app_id}</li>
+                <li><b>Batch ID:</b> ${payload.batch_id}</li>
+                <li><b>Optic Number:</b> ${payload.optic_number}</li>
+            </ul>
+
+            <p>확인이 필요합니다.</p>
+        `;
+
+            await transporter.sendMail({
+                from: `"NG Device Monitor" <${process.env.SMTP_USER}>`,
+                to: process.env.NGDEVICE_ALERT_EMAIL || 'admin@domain.com',
+                subject,
+                html,
+            });
+
+            console.log(`[NG DEVICE] Alert email sent for consultant_id=${payload.consultant_id}`);
+        } catch (err) {
+            console.error('[NG DEVICE] Failed to send alert email:', err);
+        }
+    }
 }
+
