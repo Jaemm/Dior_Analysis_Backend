@@ -14,6 +14,7 @@ export class ProductRecommendationController {
     async getProductByEmail(
         @Body() body: ProductRecommendationEmailDto,
         @Headers('x-locale') locale: string,
+        //헤더 기존 앱을 위해 유지
         @Headers('x-chowis-locale') chowisLocale: string,
         @Res() res: Response,
     ) {
