@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class ProductRecommendationEmailDto {
     @ApiProperty({
         type: String,
-        example: 'chowis@test.com',
+        example: 'choicetech@test.com',
     })
     @IsNotEmpty()
     email: string;
