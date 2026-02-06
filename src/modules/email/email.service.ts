@@ -4,13 +4,17 @@ import { createTransport } from 'nodemailer';
 import * as fs from 'fs/promises';
 import * as handlebars from 'handlebars';
 
+handlebars.registerHelper('includes', function (array: any[], value: any) {
+    if (!Array.isArray(array)) return false;
+    return array.includes(value);
+});
+
 @Injectable()
 export class EmailService {
     private nodemailerTransport: Mail;
 
     constructor() {
         this.nodemailerTransport = createTransport({
-            // pool: true,
             host: process.env.EMAIL_HOST,
             secure: false,
             auth: {
@@ -37,6 +41,7 @@ export class EmailService {
         try {
             const templatePath = `${process.env.PublicFile}/email-template/${templateName}.hbs`;
             const template = await fs.readFile(templatePath, 'utf8');
+
             const compiledTemplate = handlebars.compile(template);
             const html = compiledTemplate(context);
 

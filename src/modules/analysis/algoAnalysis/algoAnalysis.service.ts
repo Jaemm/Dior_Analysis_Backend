@@ -449,139 +449,29 @@ export class AlgoAnalysisService {
     }
 
     handleCBBImageArg(data: any) {
-        let analyzedImageArgs;
-        let originalImageArgs;
+        const type = data.type; // DB type.name 기준
 
-        switch (Number(data.algorithmId)) {
-            case 1:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'keratin');
+        // skintone만 예외 (originalImage 2장)
+        if (type === 'skintone' || type === 'skintone_dior') {
+            const analyzedImageArgs = this.S3Image.getImageArgs('originalImage1', data.type, type);
 
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'keratin');
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
+            const originalImageArgs = this.S3Image.getImageArgs('originalImage2', data.type, type);
 
-                    originalImageArgs: originalImageArgs,
-                };
-            case 2:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sensitivity');
-
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sensitivity');
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-                    originalImageArgs: originalImageArgs,
-                };
-            case 3:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'impurities');
-
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'impurities');
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-
-                    originalImageArgs: originalImageArgs,
-                };
-            case 4:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'wrinkles');
-
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'wrinkles');
-
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-
-                    originalImageArgs: originalImageArgs,
-                };
-
-            case 5:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sebumU');
-
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sebumU');
-
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-
-                    originalImageArgs: originalImageArgs,
-                };
-
-            case 6:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sebumT');
-
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sebumT');
-
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-
-                    originalImageArgs: originalImageArgs,
-                };
-            // case 'sebumT':
-            //     return this.sebumT.saveData(data, taskResponse, imageRecords, originalImage);
-            case 7:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'spots');
-
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'spots');
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-                    originalImageArgs: originalImageArgs,
-                };
-            case 8:
-                analyzedImageArgs = this.S3Image.getImageArgs('originalImage1', data.type, 'skintone');
-
-                originalImageArgs = this.S3Image.getImageArgs('originalImage2', data.type, 'skintone');
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-                    originalImageArgs: originalImageArgs,
-                };
-            // case 'skintone':
-            //     analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'skintone');
-
-            //     originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'skintone');
-
-            //     return { analyzedImageArgs: analyzedImageArgs, originalImageArgs: originalImageArgs };
-            // case 'skintone_dior':
-            //     analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'skintone');
-
-            //     originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'skintone');
-
-            //     return { analyzedImageArgs: analyzedImageArgs, originalImageArgs: originalImageArgs };
-
-            case 9:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'oiliness');
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'oiliness');
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-
-                    originalImageArgs: originalImageArgs,
-                };
-            case 10:
-                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'keratin');
-
-                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'keratin');
-
-                return {
-                    analyzedImageArgs: analyzedImageArgs,
-                    originalImageArgs: originalImageArgs,
-                };
-            // case 9:
-            //     analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sensitivityscabs');
-            //     originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sensitivityscabs');
-
-            //     return {
-            //         analyzedImageArgs: analyzedImageArgs,
-
-            //         originalImageArgs: originalImageArgs,
-            //     };
-            // case 10:
-            //     analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'sensitivityscabs');
-
-            //     originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'sensitivityscabs');
-
-            //     return {
-            //         analyzedImageArgs: analyzedImageArgs,
-
-            //         originalImageArgs: originalImageArgs,
-            //     };
-
-            default:
-                throw new Error('No such analysis type');
+            return {
+                analyzedImageArgs,
+                originalImageArgs,
+            };
         }
+
+        // 나머지는 전부 공통 규칙
+        const analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, type);
+
+        const originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, type);
+
+        return {
+            analyzedImageArgs,
+            originalImageArgs,
+        };
     }
 
     async finalAnalysis(data: AlgoAnalysisDTO, imageRecords: any, taskResponse: any, imageArg: any) {
@@ -1790,7 +1680,7 @@ export class AlgoAnalysisService {
     ) {
         data.batch_id = Number(data.batchId);
 
-        let algoId = Number(data.algorithmId); //this.AlgoAnalysis.getCBBTaskByAlgoType(Number(data.type));
+        let algoId = Number(data.algorithmId);
 
         const analyzed: any[] = [];
         const original: any[] = [];
@@ -1813,12 +1703,8 @@ export class AlgoAnalysisService {
             scores.push(data.args.score);
             raw.push(data.args.raw);
         }
-        // const savingPromise: Promise<any>[] = [];
 
-        let sum = 0;
-        sum = scores.reduce((accumulator, currentValue) => accumulator + currentValue);
         const imageRecords = uuidv4();
-        const avg = sum / scores.length;
         const uploadPromises = [];
 
         for (let i = 0; i < files.analyzedImage?.length; i++) {
@@ -1847,10 +1733,10 @@ export class AlgoAnalysisService {
                     nth_analysis: imageRecords,
                 }),
                 JSON.stringify({
-                    score: scores[i],
-                    raw: raw[i],
-                    score_average: avg.toFixed(2),
-                    answers: data?.answers === undefined ? '' : data?.answers,
+                    score: scores[i] ?? null,
+                    raw: raw[i] ?? null,
+                    score_average: data?.score_average ?? null,
+                    answers: data?.answers ?? null,
                 }),
             ]);
 
@@ -1865,7 +1751,6 @@ export class AlgoAnalysisService {
                     this.S3Image.uploadFileToS3(files?.analyzedImage[i].buffer, imageArg.analyzedImageArgs.sys_url),
                 );
             }
-            //  Image saving
         }
 
         const saveOriginal = original.map((item) => {
@@ -1889,7 +1774,6 @@ export class AlgoAnalysisService {
                 scores: item[7],
             };
         });
-        //return original
 
         const saveAnalyzed = analyzed.map((item) => {
             retunAnalyzed.push({
@@ -1944,7 +1828,7 @@ export class AlgoAnalysisService {
         app_id: number;
         name: string;
         batch_id: number;
-        optic_number?: string; // ← 여기도 추가
+        optic_number?: string;
     }) {
         try {
             const transporter = nodemailer.createTransport({

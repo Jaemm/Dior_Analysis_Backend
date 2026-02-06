@@ -173,14 +173,18 @@ export class OfflineDataCBBDTO {
 
     @IsOptional()
     consultant_id: any;
+
     @IsOptional()
     email: any;
+
     @IsOptional()
     app_id: any;
+
     @IsOptional()
     name: any;
 
-    //save the skintone
+    @IsOptional()
+    score_average: any;
 }
 
 export class SkinToneDTO {
