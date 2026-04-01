@@ -1,12 +1,9 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ImagesController } from './images.controller';
 import { ImagesService } from './images.service';
-import { DatabaseService } from 'src/database/database.service';
 import { DatabaseModule } from 'src/database/database.module';
 import { FileUploadService } from 'src/common/FileUpload/fileUpload.service';
-import { ConfigService } from 'aws-sdk';
-import { BullModule } from '@nestjs/bull';
-import { AuthMiddleware } from 'src/common/middleWare/authMiddlware/auth.middleware';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
     imports: [DatabaseModule],
@@ -21,4 +18,3 @@ export class ImagesModule {
     //         .forRoutes('image');
     // }
 }
-

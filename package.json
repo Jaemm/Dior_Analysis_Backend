@@ -38,7 +38,6 @@
         "@types/morgan": "^1.9.4",
         "@types/nodemailer": "^6.4.14",
         "@types/uuid": "^9.0.1",
-        "aws-sdk": "^2.1326.0",
         "bull": "^4.10.4",
         "celery-node": "^0.5.9",
         "class-transformer": "^0.5.1",
