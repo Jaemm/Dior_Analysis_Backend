@@ -1,10 +1,11 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { Pool } from 'pg';
+import { ConsoleLogger, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { GetcustomerHistoryDTO } from 'src/common/Dto/customer/analysisHistory/analysisHistory.dto';
 import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class AnanalysisHistoryService {
+    private readonly logger = new ConsoleLogger(AnanalysisHistoryService.name);
+
     constructor(private database: DatabaseService) {}
 
     async GetcustomerHistory(customer_id: number, data: GetcustomerHistoryDTO) {
@@ -23,41 +24,30 @@ export class AnanalysisHistoryService {
             let totalPages: any;
             let dateFilterSql: any;
             if (data.page && data.limit && !data.search && !data.from && !data.to) {
-                console.log('here we are 1');
                 dateFilterSql = ` WHERE customer_id = ${Number(customer_id)}
         LIMIT ${Number(data.limit)} OFFSET ${Number((data.page - 1) * data.limit)};`;
                 resp = await this.database.executeQuery(mainSQL + dateFilterSql);
             } else if (data.to && data.from && !data.search) {
-                console.log('here we are 2');
-
                 dateFilterSql = ` WHERE customer_id = ${Number(customer_id)} AND
         created_time >= timestamp '${data.from}'
         AND created_time <= timestamp '${data.to}'
         LIMIT ${Number(data.limit)} OFFSET ${Number((data.page - 1) * data.limit)};`;
                 resp = await this.database.executeQuery(mainSQL + dateFilterSql);
             } else if (data.to && !data.from && !data.search) {
-                console.log('here we are 3');
-
                 dateFilterSql = ` WHERE customer_id = ${Number(customer_id)} AND
         created_time <= timestamp '${data.to}'
         LIMIT ${Number(data.limit)} OFFSET ${Number((data.page - 1) * data.limit)};`;
                 resp = await this.database.executeQuery(mainSQL + dateFilterSql);
             } else if (!data.to && data.from && !data.search) {
-                console.log('here we are 4');
-
                 dateFilterSql = ` WHERE customer_id = ${Number(customer_id)} AND
         created_time >= timestamp '${data.from}'
         LIMIT ${Number(data.limit)} OFFSET ${Number((data.page - 1) * data.limit)};`;
                 resp = await this.database.executeQuery(mainSQL + dateFilterSql);
             } else if (data.search) {
-                console.log('here we are 5');
-
                 dateFilterSql = ` WHERE customer_id = ${Number(customer_id)}
         AND CAST(batch_id as TEXT) LIKE '${data.search}%'`;
                 resp = await this.database.executeQuery(mainSQL + dateFilterSql);
             } else {
-                console.log('here we are else');
-                console.log(customer_id);
                 resp = await this.database.executeQuery(mainSQL + ` WHERE customer_id = ${Number(customer_id)}`);
             }
 
@@ -69,9 +59,6 @@ export class AnanalysisHistoryService {
   `,
                 [Number(customer_id)],
             );
-
-            console.log(result);
-
             totalPages = Math.ceil(Number(result?.[0]?.count) / Number(data.limit));
 
             const retObj = {
@@ -84,8 +71,8 @@ export class AnanalysisHistoryService {
             };
             return retObj;
         } catch (error) {
-            console.log(error);
-            throw new Error();
+            this.logger.error(`[GetcustomerHistory] ${error instanceof Error ? error.message : error}`);
+            throw new InternalServerErrorException('Failed to fetch customer analysis history.');
         }
     }
 
@@ -135,7 +122,4 @@ export class AnanalysisHistoryService {
         );
         return result;
     }
-
-
 }
-

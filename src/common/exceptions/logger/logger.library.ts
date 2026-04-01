@@ -13,8 +13,7 @@ export class LoggerLibrary extends Logger {
         /* your implementation */
         logger.error(JSON.stringify(message), new Error(message));
         // super.error(message, new Error(message));
-        console.error('---------- Error ----------');
-        console.error(message);
+        super.error(message);
     }
     warn(message: string) {
         /* your implementation */

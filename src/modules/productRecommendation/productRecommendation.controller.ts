@@ -1,4 +1,4 @@
-import { Controller, Body, Get, Post, Res, Param, Headers } from '@nestjs/common';
+import { ConsoleLogger, Controller, Body, Get, Post, Res, Param, Headers, InternalServerErrorException } from '@nestjs/common';
 import { ProductRecommendationService } from './productRecommendation.service';
 import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -8,6 +8,8 @@ import { ProductRecommendationEmailDto } from 'src/common/Dto/email/email.dto';
 @Controller('productRecommendation')
 @ApiTags('Product Recommendation')
 export class ProductRecommendationController {
+    private readonly logger = new ConsoleLogger(ProductRecommendationController.name);
+
     constructor(private readonly recommendation: ProductRecommendationService, private readonly email: EmailService) {}
 
     @Post('')
@@ -148,6 +150,7 @@ export class ProductRecommendationController {
                 message: 'Success',
             });
         } catch (e) {
+            this.logger.error(`[getProductByEmail] ${e instanceof Error ? e.message : e}`);
             return res.status(500).json({
                 status: 500,
                 message: 'Internal server error',
@@ -166,8 +169,10 @@ export class ProductRecommendationController {
                 ...result,
             });
         } catch (e) {
-            throw new Error(e);
+            this.logger.error(`[getCustomerAnalysis] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException(
+                e instanceof Error ? e.message : 'Failed to get customer analysis.',
+            );
         }
     }
 }
-

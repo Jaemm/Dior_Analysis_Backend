@@ -17,8 +17,6 @@ export class SkinToneDiorService {
     ) {}
 
     analysis(data: any, taskResponse: any, originalImageFirstArgs: any, originalImageSecondArgs: any) {
-        // console.log("taskResponse", taskResponse)
-
         taskResponse = {
             ver: taskResponse.ver,
             shade: taskResponse.shade,
@@ -134,4 +132,3 @@ export class SkinToneDiorService {
         return 'saved';
     }
 }
-

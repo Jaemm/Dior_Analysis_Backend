@@ -247,10 +247,10 @@ export class WrinklesService {
     }
 
     imageArgs(data: AlgoAnalysisDTO) {
-        const analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.task.algoName, 'keratin');
-        const maskImageArgs = this.S3Image.getImageArgs('maskImage', data.task.algoName, 'keratin');
+        const analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.task.algoName, 'wrinkles');
+        const maskImageArgs = this.S3Image.getImageArgs('maskImage', data.task.algoName, 'wrinkles');
 
-        const originalImageArgs = this.S3Image.getImageArgs('originalImage', data.task.algoName, 'keratin');
+        const originalImageArgs = this.S3Image.getImageArgs('originalImage', data.task.algoName, 'wrinkles');
 
         return {
             analyzedImageArgs: analyzedImageArgs,
@@ -271,4 +271,3 @@ export class WrinklesService {
         return 'saved';
     }
 }
-

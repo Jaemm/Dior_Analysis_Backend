@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import * as Mail from 'nodemailer/lib/mailer';
 import { createTransport } from 'nodemailer';
 import * as fs from 'fs/promises';
@@ -11,6 +11,7 @@ handlebars.registerHelper('includes', function (array: any[], value: any) {
 
 @Injectable()
 export class EmailService {
+    private readonly logger = new ConsoleLogger(EmailService.name);
     private nodemailerTransport: Mail;
 
     constructor() {
@@ -28,7 +29,8 @@ export class EmailService {
 
     sendMail(options: Mail.Options) {
         return this.nodemailerTransport.sendMail(options).catch((e) => {
-            console.log(e);
+            this.logger.error(`[sendMail] ${e instanceof Error ? e.message : e}`);
+            throw e;
         });
     }
 
@@ -54,9 +56,8 @@ export class EmailService {
 
             await this.nodemailerTransport.sendMail(mailOptions);
         } catch (error) {
-            console.error('Error sending email:', error);
+            this.logger.error(`[sendEmailTemplate] ${error instanceof Error ? error.message : error}`);
             throw error;
         }
     }
 }
-

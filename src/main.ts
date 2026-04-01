@@ -6,7 +6,6 @@ import * as fs from 'fs';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { HttpException } from '@nestjs/common/exceptions';
 import { HttpStatus } from '@nestjs/common/enums';
-import { TypeORMExceptionFilter } from './common/exceptions/exceptionHandling/DBException.filter';
 import * as tls from 'tls';
 
 async function bootstrap() {
@@ -18,7 +17,7 @@ async function bootstrap() {
 
     /* ================= HTTPS (기존 + 신규 도메인) ================= */
     const ssl = process.env.SSL === 'true';
-    let httpsOptions = null;
+    let httpsOptions: Record<string, unknown> | null = null;
 
     if (ssl) {
         // 기본 인증서
@@ -101,8 +100,6 @@ async function bootstrap() {
         }),
     );
 
-    app.useGlobalFilters(new TypeORMExceptionFilter());
-
     app.enableCors();
     app.enableShutdownHooks();
 
@@ -113,4 +110,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-

@@ -17,8 +17,6 @@ export class SkintoneService {
     ) {}
 
     analysis(data: AlgoAnalysisDTO, taskResponse: any, imageArgs: any) {
-        // console.log("taskResponse", taskResponse)
-
         const analyzedImageArgs = imageArgs.analyzedImageArgs;
 
         const originalImageArgs = imageArgs.originalImageArgs;
@@ -143,4 +141,3 @@ export class SkintoneService {
         return 'saved';
     }
 }
-

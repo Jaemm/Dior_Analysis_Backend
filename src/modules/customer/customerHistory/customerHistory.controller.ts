@@ -1,25 +1,21 @@
 import {
     Controller,
-    Body,
     Get,
-    Post,
-    UseInterceptors,
-    UploadedFiles,
     Res,
     Param,
     Query,
-    UseGuards,
+    ConsoleLogger,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { query, Request, response, Response } from 'express';
+import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { GetcustomerHistoryDTO } from 'src/common/Dto/customer/analysisHistory/analysisHistory.dto';
 import { AnanalysisHistoryService } from './customerHistory.service';
-import { AuthMiddleware } from 'src/common/middleWare/authMiddlware/auth.middleware';
-import { countCustomerDto } from 'src/common/Dto/analysis/algoAnalysis.dto';
 
 @ApiTags('Customer')
 @Controller('cndpskin')
 export class AnanalysisHistoryController {
+    private readonly logger = new ConsoleLogger(AnanalysisHistoryController.name);
+
     constructor(private readonly getAnalysisHistory: AnanalysisHistoryService) {}
 
     @ApiExcludeEndpoint()
@@ -30,7 +26,6 @@ export class AnanalysisHistoryController {
         @Query() query: GetcustomerHistoryDTO,
         @Res() res: Response,
     ) {
-        console.log('param', query);
         const result = await this.getAnalysisHistory.GetcustomerHistory(customer_id, query);
 
         return res.status(200).send(result);
@@ -48,7 +43,6 @@ export class AnanalysisHistoryController {
     @Get('/:customer_id/analysis-history/analysis-infor')
     async getcustomerAnalysisInfor(@Query() query: any, @Res() res: Response) {
         try {
-            console.log(query);
             const { batch_id } = query;
             const result = await this.getAnalysisHistory.analysisInfor(Number(batch_id));
             return res.status(200).send({
@@ -57,6 +51,7 @@ export class AnanalysisHistoryController {
                 data: result,
             });
         } catch (error) {
+            this.logger.error(`[getcustomerAnalysisInfor] ${error instanceof Error ? error.message : error}`);
             return res.send({
                 status: 500,
                 type: 'InternalServerError',
@@ -66,4 +61,3 @@ export class AnanalysisHistoryController {
         }
     }
 }
-

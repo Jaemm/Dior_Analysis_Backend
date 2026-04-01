@@ -1,10 +1,10 @@
-
-import { Injectable, Inject} from '@nestjs/common';
+import { ConsoleLogger, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
-
 
 @Injectable()
 export class HistoryService {
+    private readonly logger = new ConsoleLogger(HistoryService.name);
+
     constructor(private database: DatabaseService, ){}
 
     async getAnalysisImage(batch_id: number){
@@ -233,7 +233,8 @@ export class HistoryService {
             }
             return returnObj     
         }catch(e){
-            throw new Error(e);
+            this.logger.error(`[getMesurementMask] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException('Failed to get measurement mask.');
         }
     }
 

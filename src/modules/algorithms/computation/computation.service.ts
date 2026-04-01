@@ -1,8 +1,10 @@
 import { number } from '@hapi/joi';
-import { Injectable, Inject, HttpException } from '@nestjs/common';
+import { ConsoleLogger, Injectable, InternalServerErrorException } from '@nestjs/common';
 
 @Injectable()
 export class ComputationService {
+    private readonly logger = new ConsoleLogger(ComputationService.name);
+
     constructor() {}
 
     skinAge(wrinkleCal: number, pigmCalc: number, birth_year: number) {
@@ -55,7 +57,6 @@ export class ComputationService {
         let length = ansArr.length;
         let result = 0;
 
-        // console.log(===> ansArr)
         let questionnaire_score = 0;
         for (let i = 0; i < ansArr.length; i++) {
             if (ansArr[i] === 'A' || ansArr[i] === '1') {
@@ -259,8 +260,8 @@ export class ComputationService {
 
             return final_response;
         } catch (e) {
-            console.log(e);
-            throw new Error('error');
+            this.logger.error(`[computationResult] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException('Failed to compute result.');
         }
     }
 }

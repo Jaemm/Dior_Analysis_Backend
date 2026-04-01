@@ -1,13 +1,14 @@
-import { Injectable, Inject, HttpException, ConsoleLogger, BadRequestException } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 
 import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class WebResultService {
+    private readonly logger = new ConsoleLogger(WebResultService.name);
+
     constructor(private database: DatabaseService) {}
 
     skinCondition(moistureT: number, moistureU: number, sebumT: number, sebumU: number) {
-        console.log('chack data', moistureT, moistureU, sebumT, sebumU, sebumU);
         let moisture = null;
         if (moistureT !== null || moistureU !== null) {
             moisture = (Number(moistureT) + Number(moistureU)) / 2;
@@ -16,7 +17,7 @@ export class WebResultService {
         if (sebumT !== null || sebumU !== null) {
             sebum = (Number(sebumT) + Number(moistureU)) / 2;
         }
-        console.log('check', moisture, sebum);
+        this.logger.debug(`[skinCondition] moisture=${moisture} sebum=${sebum}`);
         return {
             moisture: moisture,
             sebum: sebum,

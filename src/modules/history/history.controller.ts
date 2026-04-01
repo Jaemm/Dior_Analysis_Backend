@@ -1,13 +1,14 @@
-import { Controller, Body, Get, Post, UseInterceptors, UploadedFiles, Res, Param, Query } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ConsoleLogger, Controller, Get, Res, Param, Query, InternalServerErrorException } from '@nestjs/common';
 import { HistoryService } from './history.service';
-import { ApiBody, ApiConsumes, ApiExcludeEndpoint, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Request, response, Response } from 'express';
+import { ApiExcludeEndpoint } from '@nestjs/swagger';
+import { Response } from 'express';
 import { FileUploadService } from 'src/common/FileUpload/fileUpload.service';
 import { PaginationParams } from 'src/common/Dto/pagination/paginationParams';
 
 @Controller('history')
 export class HistoryController {
+    private readonly logger = new ConsoleLogger(HistoryController.name);
+
     constructor(private readonly getHistory: HistoryService, private readonly fileUpload: FileUploadService) {}
 
     @ApiExcludeEndpoint()
@@ -21,7 +22,8 @@ export class HistoryController {
                 batch_id: result,
             });
         } catch (e) {
-            throw new Error(e);
+            this.logger.error(`[getBatchId] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException(e instanceof Error ? e.message : 'Failed to get batch data.');
         }
     }
 
@@ -32,7 +34,6 @@ export class HistoryController {
         @Res() res: Response,
         @Query() { offset, limit }: PaginationParams,
     ) {
-        console.log('PaginationParams', offset, limit);
         try {
             const result = await this.getHistory.getCustomerAnalysis(Number(customer_id), offset, limit);
             return res.status(200).json({
@@ -41,8 +42,10 @@ export class HistoryController {
                 ...result,
             });
         } catch (e) {
-            throw new Error(e);
+            this.logger.error(`[getCustomerAnalysis] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException(
+                e instanceof Error ? e.message : 'Failed to get customer analysis history.',
+            );
         }
     }
 }
-

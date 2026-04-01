@@ -16,9 +16,10 @@ import {
     Req,
     HttpStatus,
     ConsoleLogger,
+    InternalServerErrorException,
 } from '@nestjs/common';
 import * as celery from 'celery-node';
-import e, { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { AlgoAnalysisService } from './algoAnalysis.service';
 import { FileInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
 import {
@@ -56,6 +57,8 @@ import * as fs from 'fs';
 // @UseGuards(AuthMiddleware)
 // @ApiBearerAuth('access-token')
 export class AlgoAnalysisController {
+    private readonly logger = new ConsoleLogger(AlgoAnalysisController.name);
+
     constructor(
         private readonly AlgoAnalysis: AlgoAnalysisService,
         private readonly moisture_u: MoistureUService,
@@ -181,7 +184,7 @@ export class AlgoAnalysisController {
                 return promise2;
             })
             .catch((error) => {
-                console.log(error);
+                this.logger.error(`[analysis] ${error instanceof Error ? error.message : error}`);
                 return res.send({
                     status: 500,
                     type: 'InternalServerError',
@@ -382,8 +385,6 @@ export class AlgoAnalysisController {
                 });
             }
             let batchId = await this.AlgoAnalysis.analysisFlag(batch_id, status);
-
-            console.log(batchId);
             return res.status(201).send({
                 status: 200,
                 service: 'Successful Analysis Flag saving',
@@ -684,8 +685,8 @@ export class AlgoAnalysisController {
                 body: { batch_id: insert },
             });
         } catch (e) {
-            console.log(e);
-            throw new Error(e);
+            this.logger.error(`[requestBatchId] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException(e instanceof Error ? e.message : 'Failed to request batch id.');
         }
     }
 
@@ -765,7 +766,7 @@ export class AlgoAnalysisController {
 
             res.status(201).send(result);
         } catch (error) {
-            console.error(error);
+            this.logger.error(`[dataUpload] ${error instanceof Error ? error.message : error}`);
             throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -786,7 +787,10 @@ export class AlgoAnalysisController {
                 body: { batch_id: insert },
             });
         } catch (e) {
-            throw new Error(e);
+            this.logger.error(`[countConsultation] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException(
+                e instanceof Error ? e.message : 'Failed to count consultation.',
+            );
         }
     }
 
@@ -806,7 +810,10 @@ export class AlgoAnalysisController {
                 body: { result: result },
             });
         } catch (e) {
-            console.log(e);
+            this.logger.error(`[allConsultation] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException(
+                e instanceof Error ? e.message : 'Failed to calculate revisit data.',
+            );
         }
     }
 
@@ -840,8 +847,6 @@ export class AlgoAnalysisController {
         @Res() res: Response,
         @Req() req: Request,
     ) {
-        console.log('body', data);
-
         try {
             if (!files?.image1 || !files?.image2) {
                 return res.status(HttpStatus.BAD_REQUEST).send({
@@ -978,7 +983,9 @@ export class AlgoAnalysisController {
                         optic_number: data.optic_number,
                     });
                 } catch (mailErr) {
-                    console.error('[Email] NG Device 이메일 발송 실패:', mailErr);
+                    this.logger.error(
+                        `[saveSkinTone][mail] ${mailErr instanceof Error ? mailErr.message : mailErr}`,
+                    );
                 }
             }
 
@@ -992,9 +999,8 @@ export class AlgoAnalysisController {
                 message: 'Data saved to the cloud',
             });
         } catch (error) {
-            console.error(error);
+            this.logger.error(`[saveSkinTone] ${error instanceof Error ? error.message : error}`);
             throw new HttpException('Internal server error', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
-

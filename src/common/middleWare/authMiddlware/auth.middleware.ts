@@ -1,8 +1,9 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { ConsoleLogger, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
+    private readonly logger = new ConsoleLogger(AuthMiddleware.name);
     private readonly secretKey = process.env.ACCESS_TOKEN_SECRET;
 
     use(req: Request, res: Response, next: NextFunction) {
@@ -22,7 +23,11 @@ export class AuthMiddleware implements NestMiddleware {
         try {
             const decoded = jwt.verify(token, this.secretKey);
 
-            console.log(decoded);
+            if (typeof decoded === 'object' && decoded !== null) {
+                this.logger.debug(
+                    `[auth] token verified consultant_id=${(decoded as any).consultant_id ?? (decoded as any).id ?? '-'}`,
+                );
+            }
             // return decoded;
             // Do further verification or processing if needed
             next();

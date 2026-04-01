@@ -21,7 +21,6 @@ export class ProductRecommendationService {
         this.translations = JSON.parse(fileContent);
 
         if (this.translations[language] && this.translations[language][key]) {
-            // console.log(this.translations[language]);
             return this.translations[language][key];
         } else {
             return this.translations['en'][key];
@@ -32,7 +31,6 @@ export class ProductRecommendationService {
         let saveSql;
         let result;
 
-        // console.
         const newCode = this.languageCode.lanaguageToCountry(language?.toLocaleUpperCase()) ?? 'EN';
 
         if (language === 'en') {

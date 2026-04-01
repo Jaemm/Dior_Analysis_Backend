@@ -17,8 +17,6 @@ export class SensitivityScabsService {
     ) {}
 
     analysis(data: AlgoAnalysisDTO, taskResponse: any, imageArgs: any) {
-        // console.log("taskResponse", taskResponse)
-
         const analyzedImageArgs = imageArgs.analyzedImageArgs;
         const maskImageArgs = imageArgs.maskImageArgs;
 
@@ -169,4 +167,3 @@ export class SensitivityScabsService {
         return 'saved';
     }
 }
-

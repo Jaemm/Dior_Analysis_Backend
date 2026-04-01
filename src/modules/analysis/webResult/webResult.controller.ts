@@ -1,4 +1,4 @@
-import { Controller, Body, Get, Res, Param } from '@nestjs/common';
+import { ConsoleLogger, Controller, Get, Res, Param, InternalServerErrorException } from '@nestjs/common';
 import { Response } from 'express';
 import { WebResultService } from './webResult.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -6,6 +6,8 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('WebResult')
 @Controller('web-result')
 export class WebResultController {
+    private readonly logger = new ConsoleLogger(WebResultController.name);
+
     constructor(private readonly webResult: WebResultService) {}
 
     @Get('/cndpskin/:batch_id')
@@ -19,9 +21,8 @@ export class WebResultController {
                 body: result,
             });
         } catch (e) {
-            console.log(e);
-            throw new Error(e);
+            this.logger.error(`[getBatchId] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException(e instanceof Error ? e.message : 'Failed to get web result.');
         }
     }
 }
-

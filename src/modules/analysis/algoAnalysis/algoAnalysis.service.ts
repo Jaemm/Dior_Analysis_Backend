@@ -1,10 +1,11 @@
 import {
     Injectable,
-    Inject,
     HttpException,
     ConsoleLogger,
     BadRequestException,
     UnauthorizedException,
+    InternalServerErrorException,
+    NotFoundException,
 } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { AlgoAnalysisDTO } from 'src/common/Dto/analysis/algoAnalysis.dto';
@@ -32,6 +33,8 @@ import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class AlgoAnalysisService {
+    private readonly logger = new ConsoleLogger(AlgoAnalysisService.name);
+
     constructor(
         private database: DatabaseService,
         private keratin: KeratinService,
@@ -91,7 +94,7 @@ export class AlgoAnalysisService {
             case 'fitzSG':
                 return { taskName: 'CNDP_FitzSG', algoName: 'fitzSG' };
             default:
-                throw new Error('Wrong algorithm TYPE!');
+                throw new BadRequestException(`Wrong algorithm TYPE: ${type}`);
         }
     }
 
@@ -125,7 +128,7 @@ export class AlgoAnalysisService {
                 return { taskName: 'CNDP_SensRedness', algoName: 'sensitivityredness', id: 12 };
 
             default:
-                throw new Error('Wrong algorithm TYPE!');
+                throw new BadRequestException(`Wrong algorithm TYPE: ${type}`);
         }
     }
 
@@ -162,10 +165,11 @@ export class AlgoAnalysisService {
                 // case 'fitzSG':
                 //     return this.fitzSG.analysis(data, taskResponse, imageArgs);
                 default:
-                    throw new Error('No such analysis type');
+                    throw new BadRequestException(`No such analysis type: ${data.type}`);
             }
         } catch (e) {
-            console.log(e);
+            this.logger.error(`[handleAnalysis] ${e instanceof Error ? e.message : e}`);
+            throw e;
         }
     }
 
@@ -259,7 +263,7 @@ export class AlgoAnalysisService {
                     imageArgs,
                 );
             default:
-                throw new Error('No such analysis type');
+                throw new BadRequestException(`No such analysis type: ${data.type}`);
         }
     }
 
@@ -348,8 +352,6 @@ export class AlgoAnalysisService {
                     maskImageArgs: maskImageArgs,
                     originalImageArgs: originalImageArgs,
                 };
-            // case 'sebumT':
-            //     return this.sebumT.saveData(data, taskResponse, imageRecords, originalImage);
             case 'shine':
                 analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.task.algoName, 'shine');
                 maskImageArgs = this.S3Image.getImageArgs('maskImage', data.task.algoName, 'shine');
@@ -442,9 +444,16 @@ export class AlgoAnalysisService {
                     originalImageArgs: originalImageArgs,
                 };
             case 'fitzSG':
-                return;
+                analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.type, 'fitzSG');
+                originalImageArgs = this.S3Image.getImageArgs('originalImage', data.type, 'fitzSG');
+
+                return {
+                    analyzedImageArgs,
+                    originalImageArgs,
+                };
+                ;
             default:
-                throw new Error('No such analysis type');
+                throw new BadRequestException(`No such analysis type: ${data.type}`);
         }
     }
 
@@ -489,11 +498,11 @@ export class AlgoAnalysisService {
 
             return responseBody;
         } catch (e) {
-            console.log(e);
+            this.logger.error(`[finalAnalysis] ${e instanceof Error ? e.message : e}`);
+            throw e;
         }
     }
 
-    // offline image args
     handleofflineImageArg(data: any) {
         let analyzedImageArgs;
 
@@ -606,7 +615,7 @@ export class AlgoAnalysisService {
             case 'fitzSG':
                 return;
             default:
-                throw new Error('No such analysis type');
+                throw new BadRequestException(`No such analysis type: ${data.type}`);
         }
     }
 
@@ -625,7 +634,8 @@ export class AlgoAnalysisService {
             this.database.executeQuery(update, [data, batch_id]);
             return update;
         } catch (e) {
-            console.log('check', e);
+            this.logger.error(`[updateEnvironment] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException('Failed to update analysis environment.');
         }
     }
 
@@ -661,7 +671,7 @@ export class AlgoAnalysisService {
             );
             return (await insert).length;
         } catch (e) {
-            throw new Error(e);
+            throw new InternalServerErrorException(e instanceof Error ? e.message : 'Failed to insert image.');
         }
     }
 
@@ -671,10 +681,12 @@ export class AlgoAnalysisService {
             if (mesureId['rows'][0]['id']) {
                 return mesureId['rows'][0]['id'];
             } else {
-                throw new Error('Image was not found');
+                throw new NotFoundException('Image was not found');
             }
         } catch (e) {
-            throw new Error(e);
+            throw e instanceof HttpException
+                ? e
+                : new InternalServerErrorException(e instanceof Error ? e.message : 'Failed to get image.');
         }
     }
 
@@ -795,16 +807,11 @@ export class AlgoAnalysisService {
             };
 
             return final;
-
-            // return mesureId[0];
-            // if (mesureId['rows'][0]['id']) {
-            //     return mesureId['rows'][0]['id'];
-            // } else {
-            //     throw new Error('Image was not found');
-            // }
         } catch (e) {
-            console.log(e);
-            throw new Error(e);
+            this.logger.error(`[getAnalysisData] ${e instanceof Error ? e.message : e}`);
+            throw e instanceof HttpException
+                ? e
+                : new InternalServerErrorException(e instanceof Error ? e.message : 'Failed to get analysis data.');
         }
     }
 
@@ -822,13 +829,8 @@ export class AlgoAnalysisService {
             );
 
             return image;
-            // if (mesureId['rows'][0]['id']) {
-            //     return mesureId['rows'][0]['id'];
-            // } else {
-            //     throw new Error('Image was not found');
-            // }
         } catch (e) {
-            throw new Error(e);
+            throw new InternalServerErrorException(e instanceof Error ? e.message : 'Failed to get images by batch.');
         }
     }
 
@@ -956,7 +958,7 @@ export class AlgoAnalysisService {
                     val.moisture_computation === null ? val.moisture_score : val.moisture_computation;
                 //sebum
                 val.sebum_score = val.sebum_score === null ? null : Number(val.sebum_score);
-                val.sebum_computation = val.sebum_computation === null ? val.sebum_score : val.sebumn_computation;
+                val.sebum_computation = val.sebum_computation === null ? val.sebum_score : val.sebum_computation;
                 //shine
                 val.shine_score = val.shine_score === null ? null : Number(val.shine_score);
                 val.shine_computation = val.shine_computation === null ? val.shine_score : val.shine_computation;
@@ -999,7 +1001,7 @@ export class AlgoAnalysisService {
 
             return nonEmptyResults;
         } catch (error) {
-            console.log(error);
+            this.logger.error(`[userAnalysisHistory] ${error instanceof Error ? error.message : error}`);
             throw error;
         }
 
@@ -1044,17 +1046,7 @@ export class AlgoAnalysisService {
     async userAnalysisImageHistory(customer_id: number, per: number, page: number) {
         let batchIds = await this.getCustomerBatchID(customer_id, per, page);
 
-        // const promises: Promise<any>[] = [];
-        // // geting result
-        // for (const batchId of batchIds) {
-        //     console.log('===>', batchId['batch_id']);
-        //     promises.push(this.getImageData(batchId['batch_id']));
-        // }
-
         try {
-            // const resultObj = await Promise.all(promises);
-
-            // const image: any[] = [];
             const imagePromises: Promise<any>[] = batchIds.map(async (batchId: any) => {
                 const rows = await this.getImageData(batchId['batch_id']);
                 if (rows.length > 0) {
@@ -1098,7 +1090,7 @@ export class AlgoAnalysisService {
 
             return result;
         } catch (error) {
-            console.log(error);
+            this.logger.error(`[userAnalysisImageHistory] ${error instanceof Error ? error.message : error}`);
             throw error;
         }
     }
@@ -1313,7 +1305,12 @@ export class AlgoAnalysisService {
             });
             return respObj;
         } catch (e) {
-            console.log(e);
+            this.logger.error(`[userHistoryWithBatchId] ${e instanceof Error ? e.message : e}`);
+            throw e instanceof HttpException
+                ? e
+                : new InternalServerErrorException(
+                      e instanceof Error ? e.message : 'Failed to fetch history with batch id.',
+                  );
         }
     }
 
@@ -1400,8 +1397,8 @@ export class AlgoAnalysisService {
             );
             return update;
         } catch (e) {
-            console.log('check', e);
-            throw new Error();
+            this.logger.error(`[countAnalysis] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException('Failed to count analysis.');
         }
     }
 
@@ -1438,8 +1435,8 @@ export class AlgoAnalysisService {
             );
             return update;
         } catch (e) {
-            console.log('check', e);
-            throw new Error();
+            this.logger.error(`[fetchAgeCondition] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException('Failed to fetch age condition.');
         }
     }
 
@@ -1468,8 +1465,8 @@ export class AlgoAnalysisService {
             const finalRes = result[0].answers;
             return finalRes;
         } catch (e) {
-            console.log('check', e);
-            throw new Error();
+            this.logger.error(`[fetchQuestion] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException('Failed to fetch questionnaire answers.');
         }
     }
 
@@ -1519,7 +1516,8 @@ export class AlgoAnalysisService {
             this.database.executeQuery(update, [JSON.stringify(condition), JSON.stringify(skinAge), batch_id]);
             return update;
         } catch (e) {
-            console.log('check', e);
+            this.logger.error(`[saveSkinValue] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException('Failed to save skin value.');
         }
     }
 
@@ -1534,7 +1532,8 @@ export class AlgoAnalysisService {
             this.database.executeQuery(update, [JSON.stringify(condition), JSON.stringify(skinAge), batch_id]);
             return update;
         } catch (e) {
-            console.log('check', e);
+            this.logger.error(`[saveSkinCondtion] ${e instanceof Error ? e.message : e}`);
+            throw new InternalServerErrorException('Failed to save skin condition.');
         }
     }
 
@@ -1547,7 +1546,6 @@ export class AlgoAnalysisService {
 
         const result = await this.database.executeQuery(query, [CUSTOMER_ID_LIST]);
 
-        console.log(result);
         const analysisData = result;
 
         const analysisDf = analysisData.map((row: any) => ({
@@ -1609,10 +1607,9 @@ export class AlgoAnalysisService {
             }
         }
 
-        console.log('revisitCountInThisMonthDict', revisitCountInThisMonthDict);
-        console.log('revisitDayTermDict', revisitDayTermDict);
-        console.log('revisitCountDict', revisitCountDict);
-        console.log('revisitSum', revisitSum);
+        this.logger.debug(
+            `[calculateRevisit] month=${THIS_MONTH} revisitSum=${revisitSum} customers=${uniqueCustomerIds.length}`,
+        );
         return {
             revisitCountDict: revisitCountDict,
             revisitDayTermDict: revisitDayTermDict,
@@ -1639,8 +1636,6 @@ export class AlgoAnalysisService {
             [JSON.stringify(stat), batch_id],
         );
 
-        console.log(result);
-
         return result;
     }
     //
@@ -1658,7 +1653,7 @@ export class AlgoAnalysisService {
             name: decoded['name'] ?? '',
         };
 
-        console.log('=====>', args);
+        this.logger.debug(`[decodeToken] consultant_id=${args.consultant_id} app_id=${args.app_id}`);
         return args;
     }
 
@@ -1800,7 +1795,7 @@ export class AlgoAnalysisService {
 
         Promise.all(uploadPromises)
             .then(() => {
-                console.log('Done');
+                this.logger.log(`[offlineBBC] upload completed batch_id=${data.batch_id}`);
             })
             .catch((error) => {
                 fs.appendFile('error.log', this.getErrorLog(data.batch_id + error), 'utf8', (err: any) => {
@@ -1866,10 +1861,11 @@ export class AlgoAnalysisService {
                 html,
             });
 
-            console.log(`[NG DEVICE] Alert email sent for consultant_id=${payload.consultant_id}`);
+            this.logger.log(`[NG DEVICE] Alert email sent for consultant_id=${payload.consultant_id}`);
         } catch (err) {
-            console.error('[NG DEVICE] Failed to send alert email:', err);
+            this.logger.error(
+                `[NG DEVICE] Failed to send alert email: ${err instanceof Error ? err.message : err}`,
+            );
         }
     }
 }
-

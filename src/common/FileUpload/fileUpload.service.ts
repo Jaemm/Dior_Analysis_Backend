@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ConsoleLogger, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 // import { S3 } from "@aws-sdk/client-s3";
 import { v4 as uuid } from 'uuid';
@@ -13,6 +13,8 @@ import { NotFoundException } from '@nestjs/common/exceptions';
 
 @Injectable()
 export class FileUploadService {
+    private readonly logger = new ConsoleLogger(FileUploadService.name);
+
     constructor(
         private readonly configService: ConfigService, // private readonly logger = new Logger(FileUploadService.name),
     ) {}
@@ -28,7 +30,7 @@ export class FileUploadService {
 
             s3.upload(params, (err: any, data: any) => {
                 if (err) {
-                    console.error(`Error uploading file to S3: ${err.message}`);
+                    this.logger.error(`[uploadFileToS3] ${err.message}`);
                     reject(err);
                 } else {
                     resolve(data);
@@ -56,10 +58,6 @@ export class FileUploadService {
                 resolve(data);
             });
         });
-        // return true;
-        // } catch (e) {
-        //     console.log(e);
-        // }
     }
 
     async getImageCloudS3(key: string): Promise<GetObjectOutput> {
@@ -83,16 +81,22 @@ export class FileUploadService {
 
     getImageArgs(fileUsage: string | null = null, route: string, analysisType: string | null = null) {
         const hash = uuid();
-        route = 'image' + '/';
+        const imageRoute = 'image' + '/';
         let host: any = '';
         if (this.configService.get('SSL') === true) {
             host = this.configService.get('URL') + ':' + this.configService.get('PORT') + '/';
         } else {
             host = this.configService.get('URL') + ':' + this.configService.get('PORT') + '/';
         }
-        const url = host + route + hash;
+        const url = host + imageRoute + hash;
         const filename = `${hash}_${fileUsage}.jpg`;
-        const sys_url = `${analysisType}_${fileUsage}_${hash}`;
+        const prefix =
+            typeof analysisType === 'string' && analysisType.trim().length > 0
+                ? analysisType.trim()
+                : typeof route === 'string' && route.trim().length > 0
+                  ? route.trim()
+                  : 'analysis';
+        const sys_url = `${prefix}_${fileUsage}_${hash}`;
 
         return { hash, url, filename, sys_url };
     }
@@ -120,7 +124,10 @@ export class FileUploadService {
 
             return image.Body;
         } catch (e) {
-            console.log(e);
+            this.logger.error(`[getImagesFromCloud] ${e instanceof Error ? e.message : e}`);
+            throw e instanceof NotFoundException
+                ? e
+                : new InternalServerErrorException('Failed to load image from cloud storage.');
         }
     }
 
@@ -170,4 +177,3 @@ export class FileUploadService {
         });
     }
 }
-

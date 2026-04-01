@@ -17,8 +17,6 @@ export class FitzSGService {
     ) {}
 
     analysis(data: AlgoAnalysisDTO, taskResponse: any) {
-        // console.log("taskResponse", taskResponse)
-
         // const analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.task.algoName, 'fitzSG');
 
         // const originalImageArgs = this.S3Image.getImageArgs('originalImage', data.task.algoName, 'fitzSG');
@@ -126,4 +124,3 @@ export class FitzSGService {
         return 'saved';
     }
 }
-

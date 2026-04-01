@@ -1,15 +1,16 @@
-import { Injectable, Inject, HttpException } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { MoistureDTO } from 'src/common/Dto/analysis/moisture.dto';
 
 @Injectable()
 export class SebumUService {
+    private readonly logger = new ConsoleLogger(SebumUService.name);
+
     constructor(private database: DatabaseService) {}
 
     async saveData(data: MoistureDTO, analyzedImageArgs: any, originalImageArgs: any, imageRecords: any) {
         // const analyzedImageArgs = this.S3Image.getImageArgs('analyzedImage', data.task.algoName, 'sebumU');
-
-        console.log(data);
+        this.logger.debug(`[saveData] batch_id=${data.batch_id}`);
         // const originalImageArgs = this.S3Image.getImageArgs('originalImage', data.task.algoName, 'sebumU');
 
         const saveSql =
@@ -53,4 +54,3 @@ export class SebumUService {
         return 'saved';
     }
 }
-

@@ -1,4 +1,4 @@
-import { Controller, Body, Get, Res, Param, Post, Query } from '@nestjs/common';
+import { ConsoleLogger, Controller, Body, Res, Post } from '@nestjs/common';
 import { Response } from 'express';
 import { QuestionsService } from './questions.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -7,6 +7,8 @@ import { QuestionDTO } from 'src/common/Dto/questions/question.dto';
 @ApiTags('Questions')
 @Controller('questions')
 export class QuestionsController {
+    private readonly logger = new ConsoleLogger(QuestionsController.name);
+
     constructor(private readonly QuestionsRepo: QuestionsService) {}
 
     @Post('/save')
@@ -34,7 +36,7 @@ export class QuestionsController {
                 data: results,
             });
         } catch (error: any) {
-            console.log(error);
+            this.logger.error(`[saveQuestion] ${error instanceof Error ? error.message : error}`);
             return res.send({
                 status: 500,
                 type: 'InternalServerError',
@@ -44,4 +46,3 @@ export class QuestionsController {
         }
     }
 }
-
