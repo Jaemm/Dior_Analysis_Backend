@@ -14,6 +14,7 @@ import { AllExceptionsFilter } from './common/exceptions/exceptionHandling/allEx
 import { BullModule } from '@nestjs/bull';
 import { AuthMiddleware } from './common/middleWare/authMiddlware/auth.middleware';
 import { TimingMiddleware } from './common/middleWare/timingMiddleware/timing.middleware';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
     imports: [
@@ -49,6 +50,7 @@ import { TimingMiddleware } from './common/middleWare/timingMiddleware/timing.mi
         CustomerModule,
         ProductRecommendationModule,
         EmailModule,
+        HealthModule,
 
         // Timestamp (TypeORM 사용)
         TimestampModule,
@@ -67,6 +69,8 @@ export class AppModule {
         consumer
             .apply(AuthMiddleware)
             .exclude(
+                { path: 'health', method: RequestMethod.ALL },
+                { path: 'health/(.*)', method: RequestMethod.ALL },
                 { path: 'web-result/(.*)', method: RequestMethod.ALL },
                 { path: 'image/(.*)', method: RequestMethod.GET },
                 { path: 'questions/(.*)', method: RequestMethod.ALL },
