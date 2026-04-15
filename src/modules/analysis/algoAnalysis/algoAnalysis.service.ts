@@ -102,34 +102,55 @@ export class AlgoAnalysisService {
     getCBBTaskByAlgoType(type: number) {
         switch (Number(type)) {
             case 1:
-                return { taskName: 'CNDP_SkinKeratin', algoName: 'keratin', id: 11 };
-            case 2:
                 return { taskName: 'CNDP_SkinPore', algoName: 'pores', id: 1 };
+            case 2:
+                return { taskName: 'CNDP_Sensitivity', algoName: 'sensitivity', id: 2 };
             case 3:
                 return { taskName: 'CNDP_SkinPorphyrin', algoName: 'porphyrin', id: 3 };
             case 4:
-                return { taskName: 'CNDP_SkinSebum', algoName: 'sebum', id: 15 };
-            case 5:
-                return { taskName: 'CNDP_SkinShine', algoName: 'shine', id: 10 };
-            case 6:
-                return { taskName: 'CNDP_SkinSpots', algoName: 'spots', id: 8 };
-            // case 'skintone':
-            //     return { taskName: 'CNDP_SkinTone', algoName: 'skintone' };
-            // case 'skintone_dior':
-            //     return { taskName: 'CNDP_SkinTone_Dior', algoName: 'skintone_dior' };
-            case 7:
                 return { taskName: 'CNDP_SkinWrinkles', algoName: 'wrinkles', id: 4 };
-
+            case 5:
+                return { taskName: 'CNDP_SebumU', algoName: 'sebumU', id: 5 };
+            case 6:
+                return { taskName: 'CNDP_SebumT', algoName: 'sebumT', id: 6 };
+            case 7:
+                return { taskName: 'CNDP_SkinSpots', algoName: 'spots', id: 7 };
             case 8:
-                return { taskName: 'CNDP_SensScabs', algoName: 'sensitivityscabs', id: 1 };
+                return { taskName: 'CNDP_SkinTone', algoName: 'skintone', id: 8 };
             case 9:
-                return { taskName: 'CNDP_SensScaling', algoName: 'sensitivityscaling', id: 2 };
+                return { taskName: 'CNDP_SkinShine', algoName: 'shine', id: 9 };
             case 10:
-                return { taskName: 'CNDP_SensRedness', algoName: 'sensitivityredness', id: 12 };
+                return { taskName: 'CNDP_SkinKeratin', algoName: 'keratin', id: 10 };
+            case 11:
+                return { taskName: 'CNDP_MoistureT', algoName: 'moistureT', id: 11 };
+            case 12:
+                return { taskName: 'CNDP_MoistureU', algoName: 'moistureU', id: 12 };
+            case 13:
+                return { taskName: 'CNDP_SkinTone_Dior', algoName: 'skintone_dior', id: 13 };
+            case 14:
+                return { taskName: 'CNDP_SensScabs', algoName: 'sensitivityscabs', id: 14 };
+            case 15:
+                return { taskName: 'CNDP_SkinSebum', algoName: 'sebum', id: 15 };
+            case 16:
+                return { taskName: 'CNDP_MoistureT', algoName: 'moistureT', id: 16 };
+            case 17:
+                return { taskName: 'CNDP_MoistureU', algoName: 'moistureU', id: 17 };
 
             default:
                 throw new BadRequestException(`Wrong algorithm TYPE: ${type}`);
         }
+    }
+
+    async getCBBMeasurementById(type: number) {
+        const result = await this.database.executeQuery('SELECT id, name FROM type_measurements WHERE id = $1', [
+            Number(type),
+        ]);
+
+        if (result.length === 0) {
+            throw new BadRequestException(`Wrong algorithm TYPE: ${type}`);
+        }
+
+        return { id: Number(result[0].id), algoName: result[0].name };
     }
 
     handleAnalysis(data: AlgoAnalysisDTO, taskResponse: any, imageArgs: any) {
@@ -458,6 +479,10 @@ export class AlgoAnalysisService {
     }
 
     handleCBBImageArg(data: any) {
+        if (!data.type) {
+            throw new BadRequestException('Missing algorithm type for image upload.');
+        }
+
         const type = data.type; // DB type.name 기준
 
         // skintone만 예외 (originalImage 2장)
@@ -1316,7 +1341,7 @@ export class AlgoAnalysisService {
 
     // MoistureU
     // CBB offline saving
-    offlineCBBSaveData(imageRecords: any, dataObject: any[]) {
+    async offlineCBBSaveData(imageRecords: any, dataObject: any[]) {
         if (!dataObject || dataObject.length === 0) {
             return;
         }
@@ -1327,7 +1352,7 @@ export class AlgoAnalysisService {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `;
 
-        for (const data of dataObject) {
+        const savePromises = dataObject.map((data) => {
             const values = [
                 data.batch_id,
                 data.url,
@@ -1339,8 +1364,10 @@ export class AlgoAnalysisService {
                 data.scores,
             ];
 
-            this.database.executeQuery(query, values);
-        }
+            return this.database.executeQuery(query, values);
+        });
+
+        await Promise.all(savePromises);
 
         // await this.batchAnalysis.updateEnvironment(data.batchId, environment);
 
@@ -1675,7 +1702,9 @@ export class AlgoAnalysisService {
     ) {
         data.batch_id = Number(data.batchId);
 
-        let algoId = Number(data.algorithmId);
+        const algorithm = await this.getCBBMeasurementById(Number(data.algorithmId));
+        data.type = algorithm.algoName;
+        const algoId = algorithm.id;
 
         const analyzed: any[] = [];
         const original: any[] = [];
@@ -1791,7 +1820,7 @@ export class AlgoAnalysisService {
 
         const savedResult = [...saveAnalyzed, ...saveOriginal];
 
-        this.offlineCBBSaveData(imageRecords, savedResult);
+        await this.offlineCBBSaveData(imageRecords, savedResult);
 
         Promise.all(uploadPromises)
             .then(() => {

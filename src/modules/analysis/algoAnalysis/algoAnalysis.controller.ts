@@ -870,6 +870,7 @@ export class AlgoAnalysisController {
             // algorithmId 고정
             const algoId = 8;
             data.algorithmId = algoId;
+            data.type = 'skintone';
 
             const analyzed: any[] = [];
             const original: any[] = [];
@@ -956,7 +957,7 @@ export class AlgoAnalysisController {
 
             const savedResult = [...saveAnalyzed, ...saveOriginal];
 
-            this.AlgoAnalysis.offlineCBBSaveData(imageRecords, savedResult);
+            await this.AlgoAnalysis.offlineCBBSaveData(imageRecords, savedResult);
 
             Promise.all(uploadPromises).catch(() => {
                 fs.appendFile('error.log', this.AlgoAnalysis.getErrorLog(data.batch_id), 'utf8', () => {});

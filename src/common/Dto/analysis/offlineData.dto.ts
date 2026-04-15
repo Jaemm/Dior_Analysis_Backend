@@ -162,6 +162,9 @@ export class OfflineDataCBBDTO {
     @IsOptional()
     task?: AlgoDTO;
 
+    @IsOptional()
+    type?: string;
+
     @ApiProperty({ description: 'Nested object containing score and raw data', type: MultiArgsDTO })
     @IsObject()
     @ValidateNested()
