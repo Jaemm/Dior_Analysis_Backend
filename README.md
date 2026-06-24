@@ -1,73 +1,123 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+﻿# Dior Analysis Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-  
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+피부 분석, 결과 생성, 추천 이메일 발송, 분석 이력 저장을 담당하는 NestJS 기반 백엔드입니다.  
+이미지 분석 알고리즘과 결과 전달 계층을 분리해 운영하도록 설계했습니다.
 
-## Description
+## Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- 피부 분석 API 제공
+- 분석 결과 및 질문 응답 처리
+- 제품 추천 생성 및 이메일 전송
+- 히스토리 저장 및 조회
+- 이미지 업로드/처리
+- 배치 처리 및 큐 기반 저장 작업
+- HTTPS / SNI / Swagger / CORS 지원
 
-## Installation
+## Tech Stack
 
-```bash
-$ npm install
+- NestJS
+- TypeScript
+- TypeORM
+- PostgreSQL
+- Bull
+- Redis
+- Swagger
+- Nodemailer
+- AWS S3 / file upload utilities
+- date-fns / moment / exceljs / xlsx
+
+## Architecture
+
+이 서비스는 분석 알고리즘과 결과 제공 로직을 분리한 구조입니다.
+
+- `src/modules/analysis`: 분석 오케스트레이션
+- `src/modules/algorithms`: 측정 항목별 알고리즘 서비스
+- `src/modules/productRecommendation`: 추천 결과 및 메일 발송
+- `src/modules/customer`: 고객 분석 이력
+- `src/modules/history`: 분석 히스토리
+- `src/modules/images`: 이미지 업로드 및 처리
+- `src/database`: DB pool 및 TypeORM 연결
+- `src/common`: 공통 예외, DTO, middleware, translation
+
+### Main Flow
+
+1. 이미지 또는 분석 요청 수신
+2. `analysis` 모듈에서 알고리즘 서비스 실행
+3. 결과를 가공해 web result 또는 추천 데이터 생성
+4. `productRecommendation` 모듈에서 이메일 템플릿 렌더링
+5. `history` / `customerHistory`에서 이력 저장 및 조회
+
+## Key Features
+
+- 피부 항목별 분석 서비스 분리
+- 추천 상품 이메일 자동 생성
+- 분석 결과 웹 응답 제공
+- 이미지 업로드 및 처리
+- 질문지 기반 분석 플로우 지원
+- 배치 분석 및 비동기 처리
+- 헬스체크 엔드포인트 제공
+
+## Folder Structure
+
+```text
+src
+├─ common
+├─ config
+├─ database
+├─ modules
+│  ├─ analysis
+│  ├─ algorithms
+│  ├─ customer
+│  ├─ history
+│  ├─ images
+│  ├─ productRecommendation
+│  ├─ timestamp
+│  └─ health
+└─ main.ts
 ```
 
-## Running the app
+## Run Locally
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+npm run dev
 ```
 
-## Test
+## Environment Variables
+
+`.env` 또는 배포 환경에서 주로 사용하는 항목:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+PORT=3000
+HOSTNAME=localhost
+HTTP=3001
+SSL=false
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=*****
+POSTGRES_DB=*****
+POSTGRES_DIOR_DB=*****
+POSTGRES_PASSWORD_DIOR=*****
+CHOWIS_SSL_KEY_PATH=*****
+CHOWIS_SSL_CERT_PATH=*****
+CHOICEDX_SSL_KEY_PATH=*****
+CHOICEDX_SSL_CERT_PATH=*****
 ```
 
-## Support
+## Scripts
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npm run dev
+npm run start
+npm run start:prod
+npm run test
+npm run test:e2e
+npm run migration:run
+```
 
-## Stay in touch
+## Portfolio Notes
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-  Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- 분석 알고리즘을 도메인별 서비스로 쪼개 확장 가능한 구조를 만들었습니다.
+- 추천 결과, 이메일 발송, 이력 저장을 분리해 책임을 명확히 했습니다.
+- 큐, DB pool, TypeORM을 함께 사용해 비동기 처리와 데이터 저장을 안정적으로 구성했습니다.
