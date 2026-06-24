@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+﻿import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
@@ -10,46 +10,35 @@ import * as tls from 'tls';
 
 async function bootstrap() {
     const enableSwagger = process.env.OPEN_SWAGGER === 'true';
+    const primaryHostname = process.env.PRIMARY_HOSTNAME;
+    const secondaryHostname = process.env.SECONDARY_HOSTNAME;
 
     /* ================= HTTP ================= */
     const httpApp = await NestFactory.create(AppModule);
     await httpApp.listen(process.env.HTTP);
 
-    /* ================= HTTPS (기존 + 신규 도메인) ================= */
+    /* ================= HTTPS ================= */
     const ssl = process.env.SSL === 'true';
     let httpsOptions: Record<string, unknown> | null = null;
 
     if (ssl) {
-        // 기본 인증서
-        const chowisKey = fs.readFileSync(process.env.CHOWIS_SSL_KEY_PATH || '');
-        const chowisCert = fs.readFileSync(process.env.CHOWIS_SSL_CERT_PATH || '');
-
-        // 신규 도메인 인증서
-        const choicedxKey = fs.readFileSync(process.env.CHOICEDX_SSL_KEY_PATH || '');
-        const choicedxCert = fs.readFileSync(process.env.CHOICEDX_SSL_CERT_PATH || '');
-
-        const choicedxContext = tls.createSecureContext({
-            key: choicedxKey,
-            cert: choicedxCert,
-        });
+        const keyPath = process.env.CHOWIS_SSL_KEY_PATH || '';
+        const certPath = process.env.CHOWIS_SSL_CERT_PATH || '';
+        const key = fs.readFileSync(keyPath);
+        const cert = fs.readFileSync(certPath);
 
         httpsOptions = {
-            // fallback (필수)
-            key: chowisKey,
-            cert: chowisCert,
-
+            key,
+            cert,
             SNICallback: (servername: string, cb: Function) => {
-                if (servername === 'dior-analysis.choicedx.kr') {
-                    cb(null, choicedxContext);
-                } else {
-                    cb(
-                        null,
-                        tls.createSecureContext({
-                            key: chowisKey,
-                            cert: chowisCert,
-                        }),
-                    );
+                const secureContext = tls.createSecureContext({ key, cert });
+
+                if (servername === primaryHostname || servername === secondaryHostname) {
+                    cb(null, secureContext);
+                    return;
                 }
+
+                cb(null, secureContext);
             },
         };
     }
@@ -68,12 +57,7 @@ async function bootstrap() {
     if (enableSwagger) {
         const config = new DocumentBuilder()
             .setTitle('DIOR CNDP SKIN')
-            .setDescription(
-                '<b>HOST</b><br><br>' +
-                    '<b>STAGING SERVER</b>: https://staging.chowis.cloud:4800<br><br>' +
-                    '<b>CHOWIS SERVER</b>: https://dior-analysis.chowis.cloud:4800<br><br>' +
-                    '<b>choicedx SERVER</b>: https://dior-analysis.choicedx.kr:4800<br><br>',
-            )
+            .setDescription('<b>HOST</b><br><br>Deployment-specific hosts are configured through environment variables.')
             .setVersion('2.0.0')
             .addBearerAuth(
                 {
