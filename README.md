@@ -85,13 +85,9 @@ npm run dev
 
 ## Environment Variables
 
-`.env` 또는 배포 환경에서 주로 사용하는 항목:
+`.env` 또는 배포 환경에서 사용하는 대표 항목:
 
 ```bash
-PORT=3000
-HOSTNAME=localhost
-HTTP=3001
-SSL=false
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_USER=postgres
@@ -99,10 +95,11 @@ POSTGRES_PASSWORD=*****
 POSTGRES_DB=*****
 POSTGRES_DIOR_DB=*****
 POSTGRES_PASSWORD_DIOR=*****
-CHOWIS_SSL_KEY_PATH=*****
-CHOWIS_SSL_CERT_PATH=*****
-CHOICEDX_SSL_KEY_PATH=*****
-CHOICEDX_SSL_CERT_PATH=*****
+APP_HOST=localhost
+APP_PORT=3000
+USE_SSL=false
+SSL_KEY_PATH=*****
+SSL_CERT_PATH=*****
 ```
 
 ## Scripts
